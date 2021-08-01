@@ -3,68 +3,142 @@ import React, {
   forwardRef, 
   useImperativeHandle, 
   useCallback, 
-  CSSProperties, 
   useMemo,
   useState,
   useEffect
 } from 'react'
-import { useDropzone, DropzoneOptions } from 'react-dropzone'
+import { 
+  useDropzone, 
+  DropzoneOptions 
+} from 'react-dropzone'
 import { merge } from 'lodash-es'
 import classnames from 'classnames'
-import { TWrapperTask } from '@/utils/Upload/src'
+import { Upload as ChunkFileUpload } from 'chunk-file-upload'
+import { 
+  TWrapperTask, 
+  Upload as UploadInstanceType, 
+  TRequestType, 
+} from 'chunk-file-upload/src'
 import { DEFAULT_DROP_PROPS } from './constants'
+import { customAction } from './utils'
+import { UploadProps, UploadInstance, WrapperFile } from './type'
 import styles from './index.less'
-
-type PickDropProps = "accept" | "minSize" | "maxSize" | "maxFiles" | "disabled" | "validator"
-
-export type WrapperFile = {
-  originFile?: File 
-  local?: {
-    type: "local" | "url"
-    value?: string 
-  }
-  task?: TWrapperTask
-  preview?: string 
-}
-
-export interface UploadProps extends Pick<DropzoneOptions, PickDropProps> {
-  value?: string | string[]
-  onChange?: (value: File[]) => void 
-
-  viewStyle?: CSSProperties
-  viewClassName?: string 
-  viewType?: "card" | "list" | "view-card"
-
-  imageView?: boolean 
-}
-
-export interface UploadInstance {
-
-}
 
 const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
 
   const [ files, setFiles ] = useState<WrapperFile[]>([])
+  const [ uploadInstance, setUploadInstance ] = useState<UploadInstanceType>()
 
-  const { viewClassName, viewStyle, imageView, ...nextProps } = useMemo(() => {
+  const { 
+    viewClassName, 
+    viewStyle, 
+    imageView, 
+    showUploadList=true,
+    immediately=true, 
+    request, 
+    lifecycle={}, 
+    actionUrl, 
+    onProgress, 
+    method,
+    onRemove,
+    ...nextProps 
+  } = useMemo(() => {
     return props 
   }, [props])
 
-  const onDrop: DropzoneOptions["onDrop"] = useCallback((acceptedFiles, fileRejections) => {
-    console.log(acceptedFiles, fileRejections, 24444)
-    const newFiles = acceptedFiles.map((item: File) => {
+  const uploadFn: TRequestType["uploadFn"] = useCallback((formData, name) => {
+    return Promise.resolve({ data: 0 })
+  }, [request?.uploadFn])
+
+  const exitDataFn: TRequestType["exitDataFn"] = useCallback(async (params, name) => {
+    const { exitDataFn } = request || {}
+    if(exitDataFn) return exitDataFn(params, name)
+    return {
+      data: 0
+    }
+  }, [request?.exitDataFn])
+
+  const completeFn: TRequestType["completeFn"] = useCallback(() => {
+
+  }, [request?.completeFn])
+
+  const callback: TRequestType["callback"] = useCallback(() => {
+
+  }, [request?.callback])
+
+  const taskGenerate = useCallback((file: File) => {
+    if(actionUrl) {
       return {
-        originFile: item,
-        preview: imageView ? URL.createObjectURL(item) : undefined
+        ...customAction({
+          url: actionUrl,
+          instance: uploadInstance!,
+          onProgress
+        }),
+        file: {
+          file
+        }
       }
+    }
+    return {
+      request: {
+        uploadFn,
+        completeFn,
+        exitDataFn,
+        callback
+      },
+      file: {
+        file
+      }
+    }
+  }, [
+    uploadFn,
+    completeFn,
+    exitDataFn,
+    callback,
+    actionUrl
+  ])
+
+  const addTask = useCallback((files: File | File[]) => {
+    const realFiles = Array.isArray(files) ? files : [files]
+    const wrapperFiles = realFiles.reduce<{
+      wrapperFiles: WrapperFile[]
+      errorFiles: File[]
+    }>((acc, file: File) => {
+      const tasks = uploadInstance?.add(taskGenerate(file))
+      if(Array.isArray(tasks) && tasks.length === 1) {
+        const [ name ] = tasks
+        const task = uploadInstance!.getTask(name)
+        const wrapperTask: WrapperFile = {
+          originFile: file,
+          name,
+          task: task || undefined,
+          preview: imageView ? URL.createObjectURL(file) : undefined,
+          local: {
+            type: "local"
+          }
+        }
+        acc.wrapperFiles.push(wrapperTask)
+      }else {
+        acc.errorFiles.push(file)
+      }
+      return acc 
+    }, {
+      wrapperFiles: [],
+      errorFiles: []
     })
+    return wrapperFiles
+  }, [uploadInstance, imageView, request, taskGenerate])  
+
+  const onDrop: DropzoneOptions["onDrop"] = useCallback((acceptedFiles, fileRejections) => {
+    const { wrapperFiles, errorFiles } = addTask(acceptedFiles)
+    if(!!errorFiles.length) console.error("some file error")
     setFiles(prev => {
       return [
         ...prev,
-        ...newFiles
+        ...wrapperFiles
       ]
     })
-  }, [])
+  }, [addTask])
 
   const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone(merge({}, DEFAULT_DROP_PROPS, {
     onDrop,
@@ -94,6 +168,7 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
 
   const fileDomList = useMemo(() => {
     if(!imageView) return []
+    
     return files.map(item => {
       const {  } = item 
       return (
@@ -107,6 +182,14 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
       if(file.preview) URL.revokeObjectURL(file.preview)
     })
   }, [files])
+
+  useEffect(() => {
+    if(!!uploadInstance) return 
+    const instance = new ChunkFileUpload({
+      lifecycle
+    })
+    setUploadInstance(instance)
+  }, [lifecycle, uploadInstance])
 
   return (
     <div className={styles["chunk-upload-container"]}>
