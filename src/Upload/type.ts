@@ -1,12 +1,11 @@
 import { 
-  CSSProperties, 
+  CSSProperties, ReactNode, 
 } from 'react'
 import { 
   DropzoneOptions 
 } from 'react-dropzone'
 import { 
   TWrapperTask, 
-  ECACHE_STATUS, 
   Ttask 
 } from 'chunk-file-upload/src'
 
@@ -27,22 +26,24 @@ export interface UploadProps extends Pick<DropzoneOptions, PickDropProps>, Parti
   defaultValue?: string | string[]
   value?: string | string[]
   onChange?: (value: File[]) => void 
-  onProgress?: (progress: {
-    status: ECACHE_STATUS
-    name: Symbol 
-    response: any 
-    task: TWrapperTask
-  }) => void 
-  onRemove?: (task: TWrapperTask) => (boolean | PromiseFulfilledResult<boolean> | PromiseRejectedResult)
+  // onRemove?: (task: TWrapperTask) => (boolean | PromiseFulfilledResult<boolean> | PromiseRejectedResult)
 
   viewStyle?: CSSProperties
   viewClassName?: string 
-  viewType?: "card" | "list" | "view-card" | "none"
+  viewType?: "card" | "list" | "view-card"
+  iconRender?: (file: TWrapperTask, viewType: UploadProps["viewType"]) => ReactNode
+  showUploadList?: boolean 
+  containerRender?: (action: {
+    isDragAccept: boolean 
+    isDragActive: boolean 
+    isDragReject: boolean 
+    isFocused: boolean 
+    isFileDialogActive: boolean 
+  }) => ReactNode
 
   immediately?: boolean 
 
-  imageView?: boolean 
-  showUploadList?: boolean 
+  director?: boolean 
 
   actionUrl?: string 
   method?: [string | false, string, string?]

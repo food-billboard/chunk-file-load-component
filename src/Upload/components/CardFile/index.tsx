@@ -8,7 +8,7 @@ export interface ImageViewItem {
   value: any[]
 }
 
-const ImageViewItem = memo((props: ImageViewItem) => {
+const CardFile = memo((props: ImageViewItem) => {
 
   const { value } = useMemo(() => {
     return props 
@@ -39,3 +39,5 @@ const ImageViewItem = memo((props: ImageViewItem) => {
   )
 
 })
+
+export default CardFile

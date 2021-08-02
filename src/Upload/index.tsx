@@ -15,10 +15,10 @@ import { merge } from 'lodash-es'
 import classnames from 'classnames'
 import { Upload as ChunkFileUpload } from 'chunk-file-upload'
 import { 
-  TWrapperTask, 
   Upload as UploadInstanceType, 
   TRequestType, 
 } from 'chunk-file-upload/src'
+import Container from './components/Container'
 import { DEFAULT_DROP_PROPS } from './constants'
 import { customAction } from './utils'
 import { UploadProps, UploadInstance, WrapperFile } from './type'
@@ -32,39 +32,18 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
   const { 
     viewClassName, 
     viewStyle, 
-    imageView, 
     showUploadList=true,
     immediately=true, 
     request, 
     lifecycle={}, 
     actionUrl, 
-    onProgress, 
     method,
-    onRemove,
+    withCredentials=true,
+    containerRender,
     ...nextProps 
   } = useMemo(() => {
     return props 
   }, [props])
-
-  const uploadFn: TRequestType["uploadFn"] = useCallback((formData, name) => {
-    return Promise.resolve({ data: 0 })
-  }, [request?.uploadFn])
-
-  const exitDataFn: TRequestType["exitDataFn"] = useCallback(async (params, name) => {
-    const { exitDataFn } = request || {}
-    if(exitDataFn) return exitDataFn(params, name)
-    return {
-      data: 0
-    }
-  }, [request?.exitDataFn])
-
-  const completeFn: TRequestType["completeFn"] = useCallback(() => {
-
-  }, [request?.completeFn])
-
-  const callback: TRequestType["callback"] = useCallback(() => {
-
-  }, [request?.callback])
 
   const taskGenerate = useCallback((file: File) => {
     if(actionUrl) {
@@ -72,7 +51,7 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
         ...customAction({
           url: actionUrl,
           instance: uploadInstance!,
-          onProgress
+          withCredentials: !!withCredentials,
         }),
         file: {
           file
@@ -80,22 +59,15 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
       }
     }
     return {
-      request: {
-        uploadFn,
-        completeFn,
-        exitDataFn,
-        callback
-      },
+      request: request as TRequestType,
       file: {
         file
       }
     }
   }, [
-    uploadFn,
-    completeFn,
-    exitDataFn,
-    callback,
-    actionUrl
+    request,
+    actionUrl,
+    withCredentials
   ])
 
   const addTask = useCallback((files: File | File[]) => {
@@ -112,7 +84,7 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
           originFile: file,
           name,
           task: task || undefined,
-          preview: imageView ? URL.createObjectURL(file) : undefined,
+          preview: URL.createObjectURL(file),
           local: {
             type: "local"
           }
@@ -127,7 +99,7 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
       errorFiles: []
     })
     return wrapperFiles
-  }, [uploadInstance, imageView, request, taskGenerate])  
+  }, [uploadInstance, request, taskGenerate])  
 
   const onDrop: DropzoneOptions["onDrop"] = useCallback((acceptedFiles, fileRejections) => {
     const { wrapperFiles, errorFiles } = addTask(acceptedFiles)
@@ -140,7 +112,7 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
     })
   }, [addTask])
 
-  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone(merge({}, DEFAULT_DROP_PROPS, {
+  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject, isFocused, isFileDialogActive } = useDropzone(merge({}, DEFAULT_DROP_PROPS, {
     onDrop,
     ...nextProps
   }))
@@ -159,23 +131,24 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
   }, [])
 
   const dropzoneClassName = useMemo(() => {
+    const _isDragAccept = isDragAccept && !!containerRender
+    const _isDragActive = isDragActive && !!containerRender
+    const _isDragReject = isDragReject && !!containerRender
     return classnames(styles["chunk-upload-dropzone"], {
-      [styles["chunk-upload-dropzone-accept"]]: isDragAccept,
-      [styles["chunk-upload-dropzone-active"]]: isDragActive,
-      [styles["chunk-upload-dropzone-reject"]]: isDragReject
+      [styles["chunk-upload-dropzone-accept"]]: _isDragAccept,
+      [styles["chunk-upload-dropzone-active"]]: _isDragActive,
+      [styles["chunk-upload-dropzone-reject"]]: _isDragReject
     })
-  }, [isDragAccept, isDragActive, isDragReject])
+  }, [isDragAccept, isDragActive, isDragReject, containerRender])
 
   const fileDomList = useMemo(() => {
-    if(!imageView) return []
-    
     return files.map(item => {
       const {  } = item 
       return (
         <div></div>
       )
     })
-  }, [files, imageView])
+  }, [files])
 
   useEffect(() => () => {
     files.forEach(file => {
@@ -197,16 +170,26 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
         className: dropzoneClassName
       })}>
         <input {...getInputProps()} />
-        <p>Drop the files here ...</p> :
-        <p>Drag 'n' drop some files here, or click to select files</p>
-        {/* {
-          isDragActive ?
-            <p>Drop the files here ...</p> :
-            <p>Drag 'n' drop some files here, or click to select files</p>
-        } */}
+        {
+          containerRender ? containerRender({
+            isDragAccept,
+            isDragActive,
+            isDragReject,
+            isFileDialogActive,
+            isFocused
+          }) : (
+            <Container 
+              isDragAccept={isDragAccept} 
+              isDragActive={isDragActive} 
+              isDragReject={isDragReject} 
+              isFileDialogActive={isFileDialogActive} 
+              isFocused={isFocused} 
+            />
+          )
+        }
       </div>
       {
-        !!imageView && (
+        !!showUploadList && (
           <aside {...viewProps}>
             {fileDomList}
           </aside>

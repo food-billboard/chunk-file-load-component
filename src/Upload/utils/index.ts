@@ -86,6 +86,7 @@ async function exitDataFnResponseTry(params: any, _: any, url: string, __: Uploa
   const response = await request(url, {
     method: "GET",
     params,
+    ...requestSetting,
   })
   const responseBody = bodyGetTry(response)
   return dataGetTry(responseBody, "EXIST_DATA_SCHEMA_CACHE", EXIT_DATA_FN_RES_TRY_SCHEMA)
@@ -94,38 +95,50 @@ async function exitDataFnResponseTry(params: any, _: any, url: string, __: Uploa
 async function uploadFnResponseTry(formData: any, _: any, url: string, __: Upload, requestSetting: IRequestOptions) {
   const response = await request(url, {
     method: "POST",
-    data: formData
+    data: formData,
+    ...requestSetting,
   })
   const responseBody = bodyGetTry(response)
   return dataGetTry(responseBody, "UPLOAD_DATA_SCHEMA_CACHE", UPLOAD_DATA_FN_RES_TRY_SCHEMA)
 }
 
-const headersGetTry = () => {
-
-}
-
-const methodGetTry = () => {
-
+const methodGetTry = (requestData: TRequestType, method: (string | false)[]) => {
+  const [ exitDataFnMethod, _, completeFnMethod ] = method
+  if(exitDataFnMethod === false) {
+    delete requestData.exitDataFn
+  }
+  if(completeFnMethod === false) {
+    delete requestData.completeFn
+  }
+  return requestData
 }
 
 export function customAction({
   url,
   instance,
-  onProgress,
   method,
-  headers
+  headers,
+  withCredentials=true,
 }: {
   url: string
   instance: Upload
-  onProgress?: UploadProps["onProgress"]
   method?: UploadProps["method"]
   headers?: UploadProps["headers"]
+  withCredentials?: UploadProps["withCredentials"]
 }) {
+
+  const [ exitDataFnMethod="GET", uploadFnMethod="POST", completeFnMethod="POST" ] = method || []
+  const [ exitDataFnHeaders, uploadFnHeaders, completeFnHeaders ] = headers || []
+  
 
   let requestData: TRequestType = {
     async exitDataFn(params, name) {
-      const [err, value] = await withTry(exitDataFnResponseTry)(params, name, url, instance)
-      if(err) {
+      const [err, value] = await withTry(exitDataFnResponseTry)(params, name, url, instance, {
+        headers: exitDataFnHeaders || {},
+        withCredentials: !!withCredentials,
+        method: exitDataFnMethod
+      })
+      if(err || !value) {
         console.warn("exitDataFn exist check request fail and will restart the task")
         return {
           data: 0
@@ -134,12 +147,18 @@ export function customAction({
       return value 
     },
     async uploadFn(formData, name) {
-      return uploadFnResponseTry(formData, name, url, instance) 
+      return uploadFnResponseTry(formData, name, url, instance, {
+        headers: uploadFnHeaders || {},
+        withCredentials: !!withCredentials,
+        method: uploadFnMethod as any
+      }) 
     },
     async completeFn(params) {
       const [ err ] = await withTry(request)(url, {
-        method: 'PUT',
-        params
+        params,
+        method: completeFnMethod as any || "PUT",
+        headers: completeFnHeaders || {},
+        withCredentials: !!withCredentials
       })
       if(!!err) {
         console.warn("completeFn complete request fail")
@@ -149,6 +168,12 @@ export function customAction({
 
     }
   }  
+
+  requestData = methodGetTry(requestData, [
+    exitDataFnMethod,
+    uploadFnMethod,
+    completeFnMethod
+  ])
 
   return {
     request: requestData
