@@ -61,20 +61,24 @@ export const request = async <ResBody=any>(url: string, setting: IRequestOptions
 
 const REQUEST_CACHE_SCHEMA = "__chunk_file_upload_cache__"
 
+const DEFAULT_REQUEST_CACHE_SCHEMA = {
+  BODY_SCHEMA_CACHE: "",
+  UPLOAD_DATA_SCHEMA_CACHE: "",
+  EXIST_DATA_SCHEMA_CACHE: ""
+}
+
 export const requestCacheSchemaGet = () => {
   const cache = localStorage.getItem(REQUEST_CACHE_SCHEMA)
   try {
-    return JSON.parse(cache!)
+    return JSON.parse(cache!) || { ...DEFAULT_REQUEST_CACHE_SCHEMA }
   }catch(err) {
     return {
-      body: "",
-      upload: "",
-      exist: ""
+      ...DEFAULT_REQUEST_CACHE_SCHEMA
     }
   }
 }
 
-export const requestCacheSchemaSet = (value: string | { body: string, exist: string, upload: string }) => {
+export const requestCacheSchemaSet = (value: string | { BODY_SCHEMA_CACHE: string, EXIST_DATA_SCHEMA_CACHE: string, UPLOAD_DATA_SCHEMA_CACHE: string }) => {
   const storeData = typeof value === 'string' ? value : JSON.stringify(value)
   localStorage.setItem(REQUEST_CACHE_SCHEMA, storeData)
 }

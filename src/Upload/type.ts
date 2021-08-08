@@ -1,38 +1,54 @@
 import { 
-  CSSProperties, ReactNode, 
+  CSSProperties, 
+  ReactNode, 
+  ReactElement
 } from 'react'
 import { 
   DropzoneOptions 
 } from 'react-dropzone'
 import { 
   TWrapperTask, 
-  Ttask 
+  Ttask,
+  Upload,
+  ECACHE_STATUS
 } from 'chunk-file-upload/src'
 
 export type WrapperFile = {
   originFile?: File 
   local?: {
     type: "local" | "url"
-    value?: string 
+    value?: {
+      filename?: string 
+      fileId?: string 
+      fileSize?: number 
+      preview?: string 
+      [key: string]: any 
+    }
   }
   name: Symbol
   task?: TWrapperTask
-  preview?: string 
+  getStatus: () => ECACHE_STATUS
 }
+
+export type ViewType = "card" | "list" | "view-card"
 
 type PickDropProps = "accept" | "minSize" | "maxSize" | "maxFiles" | "disabled" | "validator" | "multiple"
 
 export interface UploadProps extends Pick<DropzoneOptions, PickDropProps>, Partial<Pick<Ttask, "request" | "lifecycle">> {
-  defaultValue?: string | string[]
-  value?: string | string[]
-  onChange?: (value: File[]) => void 
-  // onRemove?: (task: TWrapperTask) => (boolean | PromiseFulfilledResult<boolean> | PromiseRejectedResult)
+  defaultValue?: string | string[] | WrapperFile | WrapperFile[]
+  value?: UploadProps["defaultValue"]
+  onChange?: (value: WrapperFile[]) => void 
+  onRemove?: (task: WrapperFile) => (boolean | PromiseFulfilledResult<boolean> | PromiseRejectedResult)
+
+  style?: CSSProperties
+  className?: string 
 
   viewStyle?: CSSProperties
   viewClassName?: string 
-  viewType?: "card" | "list" | "view-card"
-  iconRender?: (file: TWrapperTask, viewType: UploadProps["viewType"]) => ReactNode
-  showUploadList?: boolean 
+  viewType?: ViewType
+  iconRender?: (file: TWrapperTask, viewType: ViewType) => ReactNode
+  itemRender?: (originNode: ReactElement, file: WrapperFile, fileList: WrapperFile[], actions: { preview: Function, remove: Function }) => ReactNode
+  showUploadList?: boolean | { showPreviewIcon?: boolean, showRemoveIcon?: boolean, removeIcon?: ReactNode | ((file: WrapperFile) => ReactNode) } 
   containerRender?: (action: {
     isDragAccept: boolean 
     isDragActive: boolean 
@@ -43,14 +59,21 @@ export interface UploadProps extends Pick<DropzoneOptions, PickDropProps>, Parti
 
   immediately?: boolean 
 
-  director?: boolean 
+  directory?: boolean 
 
   actionUrl?: string 
-  method?: [string | false, string, string?]
+  method?: [string | false, string, string | false]
   headers?: [object | false, object | false, object | false]
   withCredentials?: boolean 
 }
 
 export interface UploadInstance {
+  getTask?: Upload["getTask"]
+}
 
+export interface ViewFileProps extends Pick<UploadProps, "viewType" | "showUploadList" | "iconRender" | "itemRender"> {
+  instance: Upload
+  value: WrapperFile[]
+  className?: string 
+  style?: CSSProperties
 }

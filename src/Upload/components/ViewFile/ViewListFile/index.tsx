@@ -1,12 +1,12 @@
 import React, { memo, useMemo } from 'react'
-import { WrapperFile } from '../../type'
+import { WrapperFile, ViewFileProps } from '../../../type'
 import styles from './index.less'
 
 export interface NormalViewItemProps {
   value: WrapperFile
 }
 
-const ViewListFile = memo((props: NormalViewItemProps) => {
+const ViewListFile = memo((props: Omit<ViewFileProps, "viewType">) => {
 
   const { value } = useMemo(() => {
     return props 

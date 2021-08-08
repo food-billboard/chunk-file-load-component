@@ -13,16 +13,21 @@ import {
 } from 'react-dropzone'
 import { merge } from 'lodash-es'
 import classnames from 'classnames'
+import { nanoid } from 'nanoid'
 import { Upload as ChunkFileUpload } from 'chunk-file-upload'
 import { 
   Upload as UploadInstanceType, 
   TRequestType, 
 } from 'chunk-file-upload/src'
 import Container from './components/Container'
+import ViewFile from './components/ViewFile'
 import { DEFAULT_DROP_PROPS } from './constants'
 import { customAction } from './utils'
+import { propsValueFormat } from './utils/tool'
 import { UploadProps, UploadInstance, WrapperFile } from './type'
 import styles from './index.less'
+
+export { request } from '../utils/request'
 
 const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
 
@@ -30,8 +35,8 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
   const [ uploadInstance, setUploadInstance ] = useState<UploadInstanceType>()
 
   const { 
-    viewClassName, 
-    viewStyle, 
+    className, 
+    style, 
     showUploadList=true,
     immediately=true, 
     request, 
@@ -40,10 +45,14 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
     method,
     withCredentials=true,
     containerRender,
+    viewType="list",
+    viewStyle,
+    viewClassName,
+    defaultValue,
+    value,
+    onChange,
     ...nextProps 
-  } = useMemo(() => {
-    return props 
-  }, [props])
+  } = props
 
   const taskGenerate = useCallback((file: File) => {
     if(actionUrl) {
@@ -79,14 +88,23 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
       const tasks = uploadInstance?.add(taskGenerate(file))
       if(Array.isArray(tasks) && tasks.length === 1) {
         const [ name ] = tasks
+        if(immediately) uploadInstance!.deal(name)
         const task = uploadInstance!.getTask(name)
         const wrapperTask: WrapperFile = {
           originFile: file,
           name,
           task: task || undefined,
-          preview: URL.createObjectURL(file),
           local: {
-            type: "local"
+            type: "local",
+            value: {
+              preview: URL.createObjectURL(file),
+              fileId: nanoid(),
+              fileSize: file.size,
+              filename: file.name
+            }
+          },
+          getStatus() {
+            return task!.status
           }
         }
         acc.wrapperFiles.push(wrapperTask)
@@ -117,18 +135,15 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
     ...nextProps
   }))
 
-  const viewProps = useMemo(() => {
-    return {
-      style: viewStyle || {},
-      className: classnames(styles["chunk-upload-list"], viewClassName)
-    }
-  }, [viewClassName, viewStyle])
+  const getTask = useCallback((name) => {
+    return uploadInstance!.getTask(name)
+  }, [uploadInstance])
 
   useImperativeHandle(ref, () => {
     return {
-
+      getTask
     }
-  }, [])
+  }, [getTask])
 
   const dropzoneClassName = useMemo(() => {
     const _isDragAccept = isDragAccept && !!containerRender
@@ -142,17 +157,14 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
   }, [isDragAccept, isDragActive, isDragReject, containerRender])
 
   const fileDomList = useMemo(() => {
-    return files.map(item => {
-      const {  } = item 
-      return (
-        <div></div>
-      )
-    })
-  }, [files])
+    return <ViewFile instance={uploadInstance!} style={viewStyle} className={viewClassName} value={files} viewType={viewType} showUploadList={showUploadList} />
+  }, [files, viewType, uploadInstance, showUploadList, viewClassName, viewStyle])
 
   useEffect(() => () => {
     files.forEach(file => {
-      if(file.preview) URL.revokeObjectURL(file.preview)
+      try {
+        URL.revokeObjectURL(file.local?.value?.preview as string)
+      }catch(err) {}
     })
   }, [files])
 
@@ -163,6 +175,22 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
     })
     setUploadInstance(instance)
   }, [lifecycle, uploadInstance])
+
+  useEffect(() => {
+    const formatDefaultValue = propsValueFormat(defaultValue)
+    setFiles(formatDefaultValue)
+  }, [])
+
+  useEffect(() => {
+    if(value !== undefined) {
+      const formatValue = propsValueFormat(defaultValue)
+      setFiles(formatValue)
+    }
+  }, [value])
+
+  useEffect(() => {
+    onChange?.(files)
+  }, [files])
 
   return (
     <div className={styles["chunk-upload-container"]}>
@@ -184,15 +212,15 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
               isDragReject={isDragReject} 
               isFileDialogActive={isFileDialogActive} 
               isFocused={isFocused} 
+              style={style}
+              className={className}
             />
           )
         }
       </div>
       {
         !!showUploadList && (
-          <aside {...viewProps}>
-            {fileDomList}
-          </aside>
+          fileDomList
         )
       }
     </div>

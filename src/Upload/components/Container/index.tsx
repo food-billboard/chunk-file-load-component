@@ -1,11 +1,11 @@
-import React, { memo } from 'react'
-import {  } from 'antd'
+import React, { memo, CSSProperties } from 'react'
 import { 
   DropzoneState
 } from 'react-dropzone'
 
 export interface ContainerProps extends Pick<DropzoneState, "isFocused" | "isDragActive" | "isDragAccept" | "isDragReject" | "isFileDialogActive"> {
-
+  style?: CSSProperties
+  className?: string 
 }
 
 const Container = memo((props: ContainerProps) => {
