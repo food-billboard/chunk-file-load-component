@@ -5,7 +5,7 @@ import React, {
   useCallback, 
   useMemo,
   useState,
-  useEffect
+  useEffect,
 } from 'react'
 import { 
   useDropzone, 
@@ -17,7 +17,7 @@ import { nanoid } from 'nanoid'
 import { Upload as ChunkFileUpload } from 'chunk-file-upload'
 import { 
   Upload as UploadInstanceType, 
-  TRequestType, 
+  TRequestType,
 } from 'chunk-file-upload/src'
 import Container from './components/Container'
 import ViewFile from './components/ViewFile'
@@ -90,15 +90,17 @@ const Upload = memo(forwardRef<UploadInstance, UploadProps>((props, ref) => {
         const [ name ] = tasks
         if(immediately) uploadInstance!.deal(name)
         const task = uploadInstance!.getTask(name)
+        const id = nanoid()
         const wrapperTask: WrapperFile = {
           originFile: file,
           name,
+          id,
           task: task || undefined,
           local: {
             type: "local",
             value: {
               preview: URL.createObjectURL(file),
-              fileId: nanoid(),
+              fileId: id,
               fileSize: file.size,
               filename: file.name
             }

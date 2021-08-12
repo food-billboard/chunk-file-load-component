@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import classnames from 'classnames'
 import Card from './CardFile'
 import List from './ListFile'
@@ -9,6 +9,18 @@ import styles from '../../index.less'
 export default memo((props: ViewFileProps) => {
 
   const { viewType, className, style, ...nextProps } = props
+
+  const onCancel = useCallback(() => {
+
+  }, [])
+
+  const onStop = useCallback(() => {
+
+  }, [])
+
+  const onUpload = useCallback(() => {
+
+  }, [])
 
   const viewProps = useMemo(() => {
     return {
@@ -30,7 +42,7 @@ export default memo((props: ViewFileProps) => {
           <span></span>
         )
     }
-  }, [viewType])
+  }, [viewType, nextProps])
 
   return (
     <aside {...viewProps}>

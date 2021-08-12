@@ -11,6 +11,8 @@
 /dist
 /docs-dist
 
+/.history
+
 # misc
 .DS_Store
 

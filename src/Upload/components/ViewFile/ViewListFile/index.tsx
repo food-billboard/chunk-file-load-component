@@ -6,6 +6,12 @@ export interface NormalViewItemProps {
   value: WrapperFile
 }
 
+const ViewItem = memo(() => {
+  return (
+    <span></span>
+  )
+})
+
 const ViewListFile = memo((props: Omit<ViewFileProps, "viewType">) => {
 
   const { value } = useMemo(() => {

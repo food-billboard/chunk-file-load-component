@@ -15,6 +15,7 @@ import {
 
 export type WrapperFile = {
   originFile?: File 
+  id: string 
   local?: {
     type: "local" | "url"
     value?: {

@@ -23,13 +23,13 @@ export default () => {
     chunkSize: number
     chunksLength: number
   }) => {
-    index = 0
     max = params.chunksLength
     chunkSize = params.chunkSize 
     size = params.size 
+    const nextOffset = index * chunkSize
     //Mock server response
     return {
-      data: 0
+      data: nextOffset >= size ? size : nextOffset
     }
   }
 
@@ -53,6 +53,7 @@ export default () => {
           if(!err) {
             console.log('Upload Done!!')
           }
+          index = 0
         }
       }} 
     />
@@ -61,7 +62,7 @@ export default () => {
 }
 ```
 
-生命周期: 
+<!-- 生命周期: 
 ```tsx
 
 ```
@@ -84,7 +85,7 @@ export default () => {
 自定义上传样式: 
 ```tsx 
 
-```
+``` -->
 
 ### API 
 
