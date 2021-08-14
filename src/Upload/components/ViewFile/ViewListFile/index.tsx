@@ -1,27 +1,22 @@
-import React, { memo, useMemo } from 'react'
-import { WrapperFile, ViewFileProps } from '../../../type'
-import styles from './index.less'
+import React, { memo, useMemo } from 'react';
+import { WrapperFile, ViewFileProps } from '../../../type';
+import { ViewDetailProps } from '../index';
+import styles from './index.less';
 
 export interface NormalViewItemProps {
-  value: WrapperFile
+  value: WrapperFile;
 }
 
 const ViewItem = memo(() => {
-  return (
-    <span></span>
-  )
-})
+  return <span></span>;
+});
 
-const ViewListFile = memo((props: Omit<ViewFileProps, "viewType">) => {
-
+const ViewListFile = memo((props: ViewDetailProps) => {
   const { value } = useMemo(() => {
-    return props 
-  }, [props])
+    return props;
+  }, [props]);
 
-  return (
-    <div></div>
-  )
+  return <div></div>;
+});
 
-})
-
-export default ViewListFile
+export default ViewListFile;
