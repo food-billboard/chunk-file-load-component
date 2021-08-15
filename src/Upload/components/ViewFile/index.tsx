@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import classnames from 'classnames';
 import { TWrapperTask } from 'chunk-file-upload/src';
 import Card from './CardFile';
@@ -6,6 +6,7 @@ import List from './ListFile';
 import ViewCard from './ViewListFile';
 import { ViewFileProps, WrapperFile } from '@/Upload/type';
 import { withTry } from '@/utils';
+import { isUploaded } from '@/Upload/utils';
 import styles from '../../index.less';
 
 export type CancelMethod = (task: WrapperFile) => Promise<boolean>;
@@ -28,8 +29,19 @@ export default memo((props: ViewFileProps) => {
     onChange,
     onRemove,
     instance,
+    value,
     ...nextProps
   } = props;
+
+  // const newValue = usePrevious(value, (prev: any, next: any) => {
+  //   if (!prev) {
+  //     return true;
+  //   }
+  //   if (!isEqual(prev, next)) {
+  //     return true;
+  //   }
+  //   return false;
+  // }) || []
 
   const onCancel: CancelMethod = useCallback(
     async (task) => {
@@ -37,8 +49,9 @@ export default memo((props: ViewFileProps) => {
         const [cancel, isCancel] = await withTry(onRemove)(task);
         if (!!cancel || isCancel === false) return false;
       }
-      const { task: fileTask, local } = task;
-      if (fileTask) {
+      const { local } = task;
+      if (!isUploaded(task)) {
+        const fileTask = task.task!;
         let result = [];
         if (fileTask.tool.file.isFileUploadStart()) {
           result = instance.cancel(fileTask.symbol);
@@ -51,18 +64,44 @@ export default memo((props: ViewFileProps) => {
           );
         }
       }
-      const newValue = nextProps.value.filter(
+      const unCancelValue = value.filter(
         (item) => item.local?.value?.fileId !== local?.value?.fileId,
       );
-      onChange(newValue);
+      onChange(unCancelValue);
       return true;
     },
-    [instance, nextProps.value, onChange, onRemove],
+    [instance, value, onChange, onRemove],
   );
 
-  const onStop: StopMethod = useCallback((task) => {}, []);
+  const onStop: StopMethod = useCallback(
+    (task) => {
+      if (!isUploaded(task)) {
+        const fileTask = task.task!;
+        const result = instance.stop(fileTask.symbol);
+        if (!result.length) {
+          console.warn(
+            'the task is not stop, please check whether this task is reasonable',
+          );
+        }
+      }
+    },
+    [instance],
+  );
 
-  const onUpload: UploadMethod = useCallback((task) => {}, []);
+  const onUpload: UploadMethod = useCallback(
+    (task) => {
+      if (!isUploaded(task)) {
+        const fileTask = task.task!;
+        const result = instance.deal(fileTask.symbol);
+        if (!result.length) {
+          console.warn(
+            'the task is not start upload, please check whether this task is reasonable',
+          );
+        }
+      }
+    },
+    [instance],
+  );
 
   const viewProps = useMemo(() => {
     return {
@@ -80,15 +119,15 @@ export default memo((props: ViewFileProps) => {
     };
     switch (viewType) {
       case 'card':
-        return <Card {...props} />;
+        return <Card {...props} value={value} />;
       case 'list':
-        return <List {...props} />;
+        return <List {...props} value={value} />;
       case 'view-card':
-        return <ViewCard {...props} />;
+        return <ViewCard {...props} value={value} />;
       default:
         return <span></span>;
     }
-  }, [viewType, nextProps, onCancel, onStop, onUpload]);
+  }, [viewType, nextProps, onCancel, onStop, onUpload, value]);
 
   return <aside {...viewProps}>{container}</aside>;
 });

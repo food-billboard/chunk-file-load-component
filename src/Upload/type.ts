@@ -42,9 +42,7 @@ export interface UploadProps
   defaultValue?: string | string[] | WrapperFile | WrapperFile[];
   value?: UploadProps['defaultValue'];
   onChange?: (value: WrapperFile[]) => void;
-  onRemove?: (
-    task: WrapperFile,
-  ) => boolean | PromiseFulfilledResult<boolean> | PromiseRejectedResult;
+  onRemove?: (task: WrapperFile) => boolean | Promise<boolean>;
 
   style?: CSSProperties;
   className?: string;
@@ -103,3 +101,5 @@ export interface ViewFileProps
 export interface UploadContextType {
   instance: Upload;
 }
+
+export type FileTaskProgress = Map<Symbol, Required<TWrapperTask['process']>>;

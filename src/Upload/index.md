@@ -11,6 +11,9 @@ let max = -1;
 let chunkSize = 0;
 let size = 0;
 
+const sleep = (times = 2000) =>
+  new Promise((resolve) => setTimeout(resolve, times));
+
 export default () => {
   const uploadRef = useRef();
 
@@ -22,6 +25,8 @@ export default () => {
     chunkSize: number;
     chunksLength: number;
   }) => {
+    await sleep();
+    console.log('exitDataFn', params);
     max = params.chunksLength;
     chunkSize = params.chunkSize;
     size = params.size;
@@ -33,12 +38,19 @@ export default () => {
   };
 
   const uploadFn = async (data: FormData, name: Symbol) => {
+    await sleep();
+    console.log('uploadFn', data, name);
     index++;
     const nextOffset = index * chunkSize;
     //Mock server response
     return {
       data: nextOffset >= size ? size : nextOffset,
     };
+  };
+
+  const completeFn = async (data: any) => {
+    await sleep();
+    console.log('completeFn', data);
   };
 
   return (
@@ -49,6 +61,7 @@ export default () => {
       request={{
         exitDataFn,
         uploadFn,
+        completeFn,
         callback(err) {
           console.log(err, 24444);
           if (!err) {

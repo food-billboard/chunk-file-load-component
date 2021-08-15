@@ -1,4 +1,11 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useMemo,
+  useState,
+  useContext,
+  useEffect,
+} from 'react';
 import {
   DeleteOutlined,
   UploadOutlined,
@@ -6,6 +13,7 @@ import {
 } from '@ant-design/icons';
 import { Button } from 'antd';
 import { Upload } from 'chunk-file-upload/src';
+import { UploadContext } from '@/Upload';
 import { WrapperFile, ViewFileProps, UploadProps } from '@/Upload/type';
 import {
   CancelMethod,
@@ -13,68 +21,68 @@ import {
   StopMethod,
   ViewDetailProps,
 } from '../index';
+import { useProgress } from '@/Upload/utils';
 import styles from './index.less';
 export interface NormalViewItemProps {
   value: WrapperFile;
 }
 
-const ViewItem = memo(
-  (props: {
-    value: WrapperFile;
-    showUploadList: UploadProps['showUploadList'];
-    onCancel: CancelMethod;
-    onUpload: UploadMethod;
-    onStop: StopMethod;
-  }) => {
-    const [cancelLoading, setCancelLoading] = useState<boolean>(false);
+const ViewItem = (props: {
+  value: WrapperFile;
+  showUploadList: UploadProps['showUploadList'];
+  onCancel: CancelMethod;
+  onUpload: UploadMethod;
+  onStop: StopMethod;
+}) => {
+  const [cancelLoading, setCancelLoading] = useState<boolean>(false);
+  const { instance } = useContext(UploadContext);
 
-    const { value, showUploadList, onCancel, onUpload, onStop } = props;
-    const { name, task } = value;
+  const { value, showUploadList, onCancel, onUpload, onStop } = props;
+  const { name, task } = value;
 
-    const isStop = !!task?.tool.file.isStop();
+  const isStop = !!task?.tool.file.isStop();
 
-    const handleStop = useCallback(() => {
-      onStop(value);
-    }, [value, onStop]);
+  const handleStop = useCallback(() => {
+    onStop(value);
+  }, [value, onStop]);
 
-    const handleUpload = useCallback(() => {
-      onUpload(value);
-    }, [value, onUpload]);
+  const handleUpload = useCallback(() => {
+    onUpload(value);
+  }, [value, onUpload]);
 
-    const handleCancel = useCallback(async () => {
-      setCancelLoading(true);
-      const result = await onCancel?.(value);
-      !result && setCancelLoading(false);
-    }, [value, onCancel]);
+  const handleCancel = useCallback(async () => {
+    setCancelLoading(true);
+    const result = await onCancel?.(value);
+    !result && setCancelLoading(false);
+  }, [value, onCancel]);
 
-    const uploadButtonAction = useMemo(() => {
-      if (isStop) {
-        return <PauseCircleOutlined onClick={handleStop} />;
-      }
-      return <UploadOutlined onClick={handleUpload} />;
-    }, [isStop, handleUpload, handleStop]);
+  const uploadButtonAction = useMemo(() => {
+    if (isStop) {
+      return <PauseCircleOutlined onClick={handleStop} />;
+    }
+    return <UploadOutlined onClick={handleUpload} />;
+  }, [isStop, handleUpload, handleStop]);
 
-    const progress = useMemo(() => {
-      const complete = task?.process.complete || 0;
-      const total = task?.process.total;
-      if (!total) return 0;
-      return (complete / total) * 100;
-    }, [task]);
+  const progress = useMemo(() => {
+    const complete = task?.process.complete || 0;
+    const total = task?.process.total;
+    if (!total) return 0;
+    return (complete / total) * 100;
+  }, [task]);
 
-    return (
-      <div>
-        {name}
-        进度{progress}-----
-        <Button loading={cancelLoading} type="link" icon={uploadButtonAction} />
-        <Button
-          loading={cancelLoading}
-          type="link"
-          icon={<DeleteOutlined onClick={handleCancel} />}
-        />
-      </div>
-    );
-  },
-);
+  return (
+    <div>
+      {name}
+      进度{progress}-----
+      <Button loading={cancelLoading} type="link" icon={uploadButtonAction} />
+      <Button
+        loading={cancelLoading}
+        type="link"
+        icon={<DeleteOutlined onClick={handleCancel} />}
+      />
+    </div>
+  );
+};
 
 const ListFile = memo((props: ViewDetailProps) => {
   const { value, showUploadList, onCancel, onUpload, onStop } = props;

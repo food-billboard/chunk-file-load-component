@@ -16,6 +16,7 @@ import { Upload as ChunkFileUpload } from 'chunk-file-upload';
 import {
   Upload as UploadInstanceType,
   TRequestType,
+  TLifecycle,
 } from 'chunk-file-upload/src';
 import Container from './components/Container';
 import ViewFile from './components/ViewFile';
@@ -27,10 +28,22 @@ import {
   UploadInstance,
   WrapperFile,
   UploadContextType,
+  FileTaskProgress,
 } from './type';
 import styles from './index.less';
 
 export { request } from '../utils/request';
+
+const lifecycleFormat = (lifecycle: TLifecycle, update: any) => {
+  return Object.entries(lifecycle).reduce((acc, cur) => {
+    const [key, action] = cur;
+    acc[key] = function (params: any) {
+      update(params);
+      return action(params);
+    };
+    return acc;
+  }, {} as any);
+};
 
 export const UploadContext = createContext<UploadContextType>({
   instance: {} as any,
@@ -41,6 +54,9 @@ const { Provider } = UploadContext;
 const Upload = memo(
   forwardRef<UploadInstance, UploadProps>((props, ref) => {
     const [files, setFiles] = useState<WrapperFile[]>([]);
+    const [fileTaskProgress, setFileTaskProgress] = useState<FileTaskProgress>(
+      new Map(),
+    );
     const [uploadInstance, setUploadInstance] = useState<UploadInstanceType>();
 
     const {
@@ -237,7 +253,10 @@ const Upload = memo(
     useEffect(() => {
       if (!!uploadInstance) return;
       const instance = new ChunkFileUpload({
-        lifecycle,
+        lifecycle: lifecycleFormat(lifecycle, (params: any) => {
+          // setFileTaskProgress(prev => {
+          // })
+        }),
       });
       setUploadInstance(instance);
     }, [lifecycle, uploadInstance]);
