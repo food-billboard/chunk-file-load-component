@@ -11,6 +11,8 @@ import { withTry } from '@/utils/tool';
 import { UploadProps } from '../type';
 
 export * from './tool';
+export * from './hooks';
+export { default as Emitter } from './emitter';
 
 const { BODY_SCHEMA_CACHE, EXIST_DATA_SCHEMA_CACHE, UPLOAD_DATA_SCHEMA_CACHE } =
   requestCacheSchemaGet();

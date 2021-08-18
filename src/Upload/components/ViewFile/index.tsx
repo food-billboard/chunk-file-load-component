@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import classnames from 'classnames';
-import { TWrapperTask } from 'chunk-file-upload/src';
 import Card from './CardFile';
 import List from './ListFile';
 import ViewCard from './ViewListFile';
@@ -32,16 +31,6 @@ export default memo((props: ViewFileProps) => {
     value,
     ...nextProps
   } = props;
-
-  // const newValue = usePrevious(value, (prev: any, next: any) => {
-  //   if (!prev) {
-  //     return true;
-  //   }
-  //   if (!isEqual(prev, next)) {
-  //     return true;
-  //   }
-  //   return false;
-  // }) || []
 
   const onCancel: CancelMethod = useCallback(
     async (task) => {

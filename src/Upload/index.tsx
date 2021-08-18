@@ -20,26 +20,26 @@ import {
 } from 'chunk-file-upload/src';
 import Container from './components/Container';
 import ViewFile from './components/ViewFile';
-import { DEFAULT_DROP_PROPS } from './constants';
-import { customAction } from './utils';
-import { propsValueFormat } from './utils/tool';
+import { DEFAULT_DROP_PROPS, LIFE_CYCLE_ENUM } from './constants';
+import { customAction, propsValueFormat, Emitter } from './utils';
 import {
   UploadProps,
   UploadInstance,
   WrapperFile,
   UploadContextType,
-  FileTaskProgress,
 } from './type';
 import styles from './index.less';
 
 export { request } from '../utils/request';
 
-const lifecycleFormat = (lifecycle: TLifecycle, update: any) => {
-  return Object.entries(lifecycle).reduce((acc, cur) => {
-    const [key, action] = cur;
-    acc[key] = function (params: any) {
-      update(params);
-      return action(params);
+const emitter = new Emitter();
+
+const lifecycleFormat = (lifecycle: TLifecycle) => {
+  return LIFE_CYCLE_ENUM.reduce((acc, cycle) => {
+    const action = (lifecycle as any)[cycle];
+    acc[cycle] = function (params: any, response: any) {
+      emitter.emit(params.name, params, response);
+      return action?.(params);
     };
     return acc;
   }, {} as any);
@@ -47,6 +47,7 @@ const lifecycleFormat = (lifecycle: TLifecycle, update: any) => {
 
 export const UploadContext = createContext<UploadContextType>({
   instance: {} as any,
+  emitter,
 });
 
 const { Provider } = UploadContext;
@@ -54,9 +55,6 @@ const { Provider } = UploadContext;
 const Upload = memo(
   forwardRef<UploadInstance, UploadProps>((props, ref) => {
     const [files, setFiles] = useState<WrapperFile[]>([]);
-    const [fileTaskProgress, setFileTaskProgress] = useState<FileTaskProgress>(
-      new Map(),
-    );
     const [uploadInstance, setUploadInstance] = useState<UploadInstanceType>();
 
     const {
@@ -236,6 +234,7 @@ const Upload = memo(
     const contextValue = useMemo(() => {
       return {
         instance: uploadInstance!,
+        emitter,
       };
     }, [uploadInstance]);
 
@@ -253,10 +252,7 @@ const Upload = memo(
     useEffect(() => {
       if (!!uploadInstance) return;
       const instance = new ChunkFileUpload({
-        lifecycle: lifecycleFormat(lifecycle, (params: any) => {
-          // setFileTaskProgress(prev => {
-          // })
-        }),
+        lifecycle: lifecycleFormat(lifecycle),
       });
       setUploadInstance(instance);
     }, [lifecycle, uploadInstance]);

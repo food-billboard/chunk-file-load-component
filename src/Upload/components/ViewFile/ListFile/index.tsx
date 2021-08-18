@@ -39,6 +39,7 @@ const ViewItem = (props: {
 
   const { value, showUploadList, onCancel, onUpload, onStop } = props;
   const { name, task } = value;
+  const [, , progress] = useProgress(name);
 
   const isStop = !!task?.tool.file.isStop();
 
@@ -62,13 +63,6 @@ const ViewItem = (props: {
     }
     return <UploadOutlined onClick={handleUpload} />;
   }, [isStop, handleUpload, handleStop]);
-
-  const progress = useMemo(() => {
-    const complete = task?.process.complete || 0;
-    const total = task?.process.total;
-    if (!total) return 0;
-    return (complete / total) * 100;
-  }, [task]);
 
   return (
     <div>

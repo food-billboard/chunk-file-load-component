@@ -6,6 +6,7 @@ import {
   Upload,
   ECACHE_STATUS,
 } from 'chunk-file-upload/src';
+import { Emitter } from './utils';
 
 export type WrapperFile = {
   originFile?: File;
@@ -100,6 +101,7 @@ export interface ViewFileProps
 
 export interface UploadContextType {
   instance: Upload;
+  emitter: Emitter;
 }
 
 export type FileTaskProgress = Map<Symbol, Required<TWrapperTask['process']>>;
