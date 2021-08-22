@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { WrapperFile, ViewFileProps } from '../../../type';
 import { ViewDetailProps } from '../index';
-import styles from './index.less';
+import './index.less';
 
 export interface NormalViewItemProps {
   value: WrapperFile;

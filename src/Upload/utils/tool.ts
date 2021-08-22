@@ -22,5 +22,9 @@ export const propsValueFormat = (value: UploadProps['defaultValue']) => {
 };
 
 export const isUploaded = (task: WrapperFile) => {
-  return task.local?.type === 'url' && !task.task;
+  return (
+    task.local?.type === 'url' ||
+    !task.task ||
+    task.task.tool.file.isTaskComplete(task.task)
+  );
 };

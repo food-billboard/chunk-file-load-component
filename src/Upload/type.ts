@@ -51,7 +51,7 @@ export interface UploadProps
   viewStyle?: CSSProperties;
   viewClassName?: string;
   viewType?: ViewType;
-  iconRender?: (file: TWrapperTask, viewType: ViewType) => ReactNode;
+  iconRender?: (file: WrapperFile, viewType: ViewType) => ReactNode;
   itemRender?: (
     originNode: ReactElement,
     file: WrapperFile,
@@ -71,6 +71,7 @@ export interface UploadProps
     isDragReject: boolean;
     isFocused: boolean;
     isFileDialogActive: boolean;
+    locale: UploadProps['locale'];
   }) => ReactNode;
 
   immediately?: boolean;
@@ -81,6 +82,21 @@ export interface UploadProps
   method?: [string | false, string, string | false];
   headers?: [object | false, object | false, object | false];
   withCredentials?: boolean;
+
+  locale?: {
+    container?: string | ReactNode;
+    containerIcon?: string | ReactNode;
+    progress?: {
+      pending?: string | ReactNode;
+      waiting?: string | ReactNode;
+      reading?: string | ReactNode;
+      uploading?: string | ReactNode;
+      fulfilled?: string | ReactNode;
+      rejected?: string | ReactNode;
+      cancel?: string | ReactNode;
+      stopping?: string | ReactNode;
+    };
+  };
 }
 
 export interface UploadInstance {
@@ -102,6 +118,7 @@ export interface ViewFileProps
 export interface UploadContextType {
   instance: Upload;
   emitter: Emitter;
+  locale: UploadProps['locale'];
 }
 
 export type FileTaskProgress = Map<Symbol, Required<TWrapperTask['process']>>;

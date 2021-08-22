@@ -13,7 +13,7 @@ export type UploadMethod = (task: WrapperFile) => void;
 export type StopMethod = UploadMethod;
 export type ViewDetailProps = Omit<
   ViewFileProps,
-  'viewType' | 'instance' | 'onRemove' | 'onChange'
+  'instance' | 'onRemove' | 'onChange'
 > & {
   onCancel: CancelMethod;
   onUpload: UploadMethod;
@@ -81,7 +81,12 @@ export default memo((props: ViewFileProps) => {
     (task) => {
       if (!isUploaded(task)) {
         const fileTask = task.task!;
-        const result = instance.deal(fileTask.symbol);
+        let result = [];
+        if (task.task?.tool.file.isStop(task.task)) {
+          result = instance.start(fileTask.symbol);
+        } else {
+          result = instance.deal(fileTask.symbol);
+        }
         if (!result.length) {
           console.warn(
             'the task is not start upload, please check whether this task is reasonable',
@@ -102,6 +107,7 @@ export default memo((props: ViewFileProps) => {
   const container = useMemo(() => {
     const props = {
       ...nextProps,
+      viewType,
       onCancel,
       onStop,
       onUpload,

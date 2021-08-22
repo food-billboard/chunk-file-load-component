@@ -1,0 +1,32 @@
+ul {
+  margin: 0;
+  padding: 0;
+}
+.chunk-upload-list {
+  &-item {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    &-icon {
+      margin-right: 14px;
+      font-size: 2em;
+    }
+    &-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin-right: 14px;
+      flex: 1;
+      & > span {
+        display: inline-block;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+    button:nth-of-type(1) {
+      margin-right: 8px;
+    }
+  }
+}

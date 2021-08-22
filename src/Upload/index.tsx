@@ -10,7 +10,6 @@ import React, {
 } from 'react';
 import { useDropzone, DropzoneOptions } from 'react-dropzone';
 import { merge } from 'lodash-es';
-import classnames from 'classnames';
 import { nanoid } from 'nanoid';
 import { Upload as ChunkFileUpload } from 'chunk-file-upload';
 import {
@@ -28,26 +27,28 @@ import {
   WrapperFile,
   UploadContextType,
 } from './type';
-import styles from './index.less';
+import './index.less';
 
 export { request } from '../utils/request';
+export * from './type';
 
 const emitter = new Emitter();
 
-const lifecycleFormat = (lifecycle: TLifecycle) => {
-  return LIFE_CYCLE_ENUM.reduce((acc, cycle) => {
+function lifecycleFormat(lifecycle: TLifecycle) {
+  return LIFE_CYCLE_ENUM.reduce(function (acc, cycle) {
     const action = (lifecycle as any)[cycle];
     acc[cycle] = function (params: any, response: any) {
-      emitter.emit(params.name, params, response);
+      emitter.emit(params.name, params, response, this);
       return action?.(params);
     };
     return acc;
   }, {} as any);
-};
+}
 
 export const UploadContext = createContext<UploadContextType>({
   instance: {} as any,
   emitter,
+  locale: {},
 });
 
 const { Provider } = UploadContext;
@@ -75,6 +76,8 @@ const Upload = memo(
       value,
       onChange,
       onRemove,
+      locale,
+      iconRender,
       ...nextProps
     } = props;
 
@@ -113,7 +116,6 @@ const Upload = memo(
             const tasks = uploadInstance?.add(taskGenerate(file));
             if (Array.isArray(tasks) && tasks.length === 1) {
               const [name] = tasks;
-              if (immediately) uploadInstance!.deal(name);
               const task = uploadInstance!.getTask(name);
               const id = nanoid();
               const wrapperTask: WrapperFile = {
@@ -135,6 +137,7 @@ const Upload = memo(
                 },
               };
               acc.wrapperFiles.push(wrapperTask);
+              if (immediately) uploadInstance!.deal(name);
             } else {
               acc.errorFiles.push(file);
             }
@@ -193,17 +196,6 @@ const Upload = memo(
       [getTask],
     );
 
-    const dropzoneClassName = useMemo(() => {
-      const _isDragAccept = isDragAccept && !!containerRender;
-      const _isDragActive = isDragActive && !!containerRender;
-      const _isDragReject = isDragReject && !!containerRender;
-      return classnames(styles['chunk-upload-dropzone'], {
-        [styles['chunk-upload-dropzone-accept']]: _isDragAccept,
-        [styles['chunk-upload-dropzone-active']]: _isDragActive,
-        [styles['chunk-upload-dropzone-reject']]: _isDragReject,
-      });
-    }, [isDragAccept, isDragActive, isDragReject, containerRender]);
-
     const onFilesChange = useCallback((files: WrapperFile[]) => {
       setFiles(files);
     }, []);
@@ -219,6 +211,7 @@ const Upload = memo(
           showUploadList={showUploadList}
           onChange={onFilesChange}
           onRemove={onRemove}
+          iconRender={iconRender}
         />
       );
     }, [
@@ -235,8 +228,9 @@ const Upload = memo(
       return {
         instance: uploadInstance!,
         emitter,
+        locale,
       };
-    }, [uploadInstance]);
+    }, [uploadInstance, locale]);
 
     useEffect(
       () => () => {
@@ -275,33 +269,20 @@ const Upload = memo(
 
     return (
       <Provider value={contextValue}>
-        <div className={styles['chunk-upload-container']}>
-          <div
-            {...getRootProps({
-              className: dropzoneClassName,
-            })}
-          >
-            <input {...getInputProps()} />
-            {containerRender ? (
-              containerRender({
-                isDragAccept,
-                isDragActive,
-                isDragReject,
-                isFileDialogActive,
-                isFocused,
-              })
-            ) : (
-              <Container
-                isDragAccept={isDragAccept}
-                isDragActive={isDragActive}
-                isDragReject={isDragReject}
-                isFileDialogActive={isFileDialogActive}
-                isFocused={isFocused}
-                style={style}
-                className={className}
-              />
-            )}
-          </div>
+        <div className={'chunk-upload-container'}>
+          <Container
+            isDragAccept={isDragAccept}
+            isDragActive={isDragActive}
+            isDragReject={isDragReject}
+            isFileDialogActive={isFileDialogActive}
+            isFocused={isFocused}
+            style={style}
+            className={className}
+            locale={locale}
+            containerRender={containerRender}
+            root={getRootProps<any>({})}
+            input={getInputProps<any>({})}
+          />
           {!!showUploadList && fileDomList}
         </div>
       </Provider>

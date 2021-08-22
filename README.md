@@ -2,8 +2,6 @@
 
 ## Getting Started
 
-Install dependencies,
-
 ```bash
 $ npm i
 ```
@@ -25,3 +23,7 @@ Build library via `father-build`,
 ```bash
 $ npm run build
 ```
+
+## Component
+
+- `Upload`
