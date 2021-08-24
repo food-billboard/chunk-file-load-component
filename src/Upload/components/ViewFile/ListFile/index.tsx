@@ -15,6 +15,7 @@ import {
   StopMethod,
   ViewDetailProps,
 } from '../index';
+import { itemRender } from '@/Upload/utils';
 import './index.less';
 export interface NormalViewItemProps {
   value: WrapperFile;
@@ -103,7 +104,7 @@ const ListFile = memo((props: ViewDetailProps) => {
 
   const list = useMemo(() => {
     return value.map((item) => {
-      return (
+      const node = (
         <ViewItem
           value={item}
           key={item.id}
@@ -115,6 +116,9 @@ const ListFile = memo((props: ViewDetailProps) => {
           viewType={viewType}
         />
       );
+      const result = itemRender(props, item, value);
+      if (result) return result(node);
+      return node;
     });
   }, [value]);
 

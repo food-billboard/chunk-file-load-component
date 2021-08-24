@@ -56,7 +56,12 @@ export interface UploadProps
     originNode: ReactElement,
     file: WrapperFile,
     fileList: WrapperFile[],
-    actions: { preview: Function; remove: Function },
+    actions: {
+      preview: Function;
+      upload: Function;
+      cancel: Function;
+      stop: Function;
+    },
   ) => ReactNode;
   showUploadList?:
     | boolean

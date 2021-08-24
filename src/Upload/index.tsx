@@ -78,6 +78,7 @@ const Upload = memo(
       onRemove,
       locale,
       iconRender,
+      itemRender,
       ...nextProps
     } = props;
 
@@ -212,6 +213,7 @@ const Upload = memo(
           onChange={onFilesChange}
           onRemove={onRemove}
           iconRender={iconRender}
+          itemRender={itemRender}
         />
       );
     }, [
@@ -222,6 +224,7 @@ const Upload = memo(
       viewClassName,
       viewStyle,
       onRemove,
+      itemRender,
     ]);
 
     const contextValue = useMemo(() => {
@@ -271,6 +274,7 @@ const Upload = memo(
       <Provider value={contextValue}>
         <div className={'chunk-upload-container'}>
           <Container
+            viewType={viewType}
             isDragAccept={isDragAccept}
             isDragActive={isDragActive}
             isDragReject={isDragReject}

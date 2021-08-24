@@ -1,9 +1,10 @@
-import React, { memo, CSSProperties, useMemo } from 'react';
+import React, { memo, CSSProperties } from 'react';
 import { DropzoneState } from 'react-dropzone';
-import { FileTwoTone } from '@ant-design/icons';
-import classnames from 'classnames';
-import { UploadProps } from '@/Upload/type';
-import './index.less';
+import { pick } from 'lodash-es';
+import { UploadProps, ViewType } from '@/Upload/type';
+import ListFile from './ListFile';
+import CardFile from './CardFile';
+import ViewListFile from './ViewlistFile';
 
 export interface ContainerProps
   extends Pick<
@@ -17,73 +18,40 @@ export interface ContainerProps
   style?: CSSProperties;
   className?: string;
   locale?: UploadProps['locale'];
-  containerRender?: UploadProps['containerRender'];
   root: ReturnType<DropzoneState['getRootProps']>;
   input: ReturnType<DropzoneState['getInputProps']>;
 }
 
-const Container = memo((props: ContainerProps) => {
-  const {
-    locale,
-    isFocused,
-    isDragAccept,
-    isDragActive,
-    isDragReject,
-    isFileDialogActive,
-    className,
-    input,
-    root,
-    containerRender,
-  } = props;
+const Container = memo(
+  (
+    props: {
+      viewType: ViewType;
+      containerRender?: UploadProps['containerRender'];
+    } & ContainerProps,
+  ) => {
+    const { viewType, containerRender, ...nextProps } = props;
 
-  const dropzoneClassName = useMemo(() => {
-    return classnames(
-      'chunk-upload-dropzone',
-      {
-        'chunk-upload-dropzone-accept': isDragAccept,
-        'chunk-upload-dropzone-active': isDragActive,
-        'chunk-upload-dropzone-reject': isDragReject,
-      },
-      className,
-    );
-  }, [isDragAccept, isDragActive, isDragReject, className]);
-
-  const container = useMemo(() => {
     if (containerRender) {
-      return containerRender({
-        isDragAccept,
-        isDragActive,
-        isDragReject,
-        isFileDialogActive,
-        isFocused,
-        locale,
-      });
+      const params = pick(nextProps, [
+        'isDragAccept',
+        'isDragActive',
+        'isDragReject',
+        'isFileDialogActive',
+        'isFocused',
+        'locale',
+      ]);
+      return <>{containerRender(params as any)}</>;
     }
-    return (
-      <>
-        <span className={'chunk-upload-container-icon'}>
-          {locale?.containerIcon || (
-            <FileTwoTone className={'chunk-upload-container-icon-main'} />
-          )}
-        </span>
-        <span>{locale?.container || '点击或拖拽文件到此处'}</span>
-      </>
-    );
-  }, [
-    locale,
-    isDragAccept,
-    isDragActive,
-    isDragReject,
-    isFileDialogActive,
-    isFocused,
-  ]);
 
-  return (
-    <div className={dropzoneClassName} {...root}>
-      <input {...input} />
-      {container}
-    </div>
-  );
-});
+    switch (viewType) {
+      case 'list':
+        return <ListFile {...nextProps} />;
+      case 'card':
+        return <CardFile {...nextProps} />;
+      case 'view-card':
+        return <ViewListFile {...nextProps} />;
+    }
+  },
+);
 
 export default Container;
