@@ -24,9 +24,10 @@ export type WrapperFile = {
   name: Symbol;
   task?: TWrapperTask;
   getStatus: () => ECACHE_STATUS;
+  error?: any;
 };
 
-export type ViewType = 'card' | 'list' | 'view-card';
+export type ViewType = 'card' | 'list';
 
 type PickDropProps =
   | 'accept'
@@ -76,6 +77,7 @@ export interface UploadProps
     isDragReject: boolean;
     isFocused: boolean;
     isFileDialogActive: boolean;
+    isLimit: boolean;
     locale: UploadProps['locale'];
   }) => ReactNode;
 

@@ -15,7 +15,7 @@ const Progress = memo(
     },
   ) => {
     const { file, className, style, onChange, ...nextProps } = props;
-    const { name } = file;
+    const { name, error } = file;
 
     const [, , progress, origin] = useProgress(name);
     const status = useStatus(origin.step);
@@ -37,10 +37,20 @@ const Progress = memo(
 
     return (
       <div
-        className={classnames('chunk-upload-list-progress', className)}
+        className={classnames(
+          'chunk-upload-list-progress',
+          {
+            'chunk-upload-list-progress-error': !!error,
+          },
+          className,
+        )}
         style={style}
       >
-        <AntProgress percent={parseFloat(percent.toFixed(1))} {...nextProps} />
+        <AntProgress
+          percent={parseFloat(percent.toFixed(1))}
+          status={!!error ? 'exception' : undefined}
+          {...nextProps}
+        />
         <span className="chunk-upload-list-progress-status">{status}</span>
       </div>
     );

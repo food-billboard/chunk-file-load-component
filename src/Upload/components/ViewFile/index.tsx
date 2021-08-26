@@ -2,7 +2,6 @@ import React, { memo, useCallback, useMemo } from 'react';
 import classnames from 'classnames';
 import Card from './CardFile';
 import List from './ListFile';
-import ViewCard from './ViewListFile';
 import { ViewFileProps, WrapperFile } from '@/Upload/type';
 import { withTry } from '@/utils';
 import { isUploaded } from '@/Upload/utils';
@@ -117,8 +116,6 @@ export default memo((props: ViewFileProps) => {
         return <Card {...props} value={value} />;
       case 'list':
         return <List {...props} value={value} />;
-      case 'view-card':
-        return <ViewCard {...props} value={value} />;
       default:
         return <span></span>;
     }

@@ -4,11 +4,11 @@ import {
   UploadOutlined,
   PauseCircleOutlined,
 } from '@ant-design/icons';
+import classnames from 'classnames';
 import { Button } from 'antd';
 import Icon from '../IconRender';
 import Progress from '../Progress';
-import { UploadContext } from '@/Upload';
-import { WrapperFile, UploadProps } from '@/Upload/type';
+import { UploadContext, WrapperFile, UploadProps } from '@/Upload';
 import {
   CancelMethod,
   UploadMethod,
@@ -37,7 +37,7 @@ const ViewItem = (props: {
   const { instance } = useContext(UploadContext);
 
   const { value, viewType, onCancel, onUpload, onStop, iconRender } = props;
-  const { task, local, id } = value;
+  const { task, local, id, error } = value;
 
   const handleStop = useCallback(() => {
     onStop(value);
@@ -75,16 +75,25 @@ const ViewItem = (props: {
         file={value}
         viewType={viewType!}
       />
-      <div className="chunk-upload-list-item-info">
+      <div
+        className={classnames('chunk-upload-list-item-info', {
+          'chunk-upload-list-item-info-error': !!error,
+        })}
+      >
         <Progress file={value} onChange={onProgressChange} />
         <span>{local?.value?.filename || local?.value?.fileId || id}</span>
       </div>
-      {!isComplete && (
-        <Button loading={cancelLoading} type="link" icon={uploadButtonAction} />
-      )}
+      <Button
+        danger={!!error}
+        style={{ visibility: isComplete ? 'hidden' : 'visible' }}
+        loading={cancelLoading}
+        type="link"
+        icon={uploadButtonAction}
+      />
       <Button
         loading={cancelLoading}
         type="link"
+        danger={!!error}
         icon={<DeleteOutlined onClick={handleCancel} />}
       />
     </li>

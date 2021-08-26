@@ -1,10 +1,9 @@
-import React, { memo, CSSProperties } from 'react';
+import React, { memo, CSSProperties, useMemo } from 'react';
 import { DropzoneState } from 'react-dropzone';
-import { pick } from 'lodash-es';
-import { UploadProps, ViewType } from '@/Upload/type';
+import { pick, merge } from 'lodash-es';
+import { UploadProps, ViewType } from '@/Upload';
 import ListFile from './ListFile';
 import CardFile from './CardFile';
-import ViewListFile from './ViewlistFile';
 
 export interface ContainerProps
   extends Pick<
@@ -27,12 +26,20 @@ const Container = memo(
     props: {
       viewType: ViewType;
       containerRender?: UploadProps['containerRender'];
+      maxFiles?: number;
+      currentFiles: number;
     } & ContainerProps,
   ) => {
-    const { viewType, containerRender, ...nextProps } = props;
+    const { viewType, containerRender, maxFiles, currentFiles, ...nextProps } =
+      props;
+
+    const isLimit = useMemo(() => {
+      if (maxFiles === undefined) return false;
+      return maxFiles >= currentFiles;
+    }, [maxFiles]);
 
     if (containerRender) {
-      const params = pick(nextProps, [
+      let params: any = pick(nextProps, [
         'isDragAccept',
         'isDragActive',
         'isDragReject',
@@ -40,16 +47,21 @@ const Container = memo(
         'isFocused',
         'locale',
       ]);
+      params = merge({}, params, {
+        isLimit,
+      });
       return <>{containerRender(params as any)}</>;
     }
+
+    if (isLimit) return <span></span>;
 
     switch (viewType) {
       case 'list':
         return <ListFile {...nextProps} />;
       case 'card':
         return <CardFile {...nextProps} />;
-      case 'view-card':
-        return <ViewListFile {...nextProps} />;
+      default:
+        return <span></span>;
     }
   },
 );

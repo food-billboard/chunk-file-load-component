@@ -82,6 +82,26 @@ const Upload = memo(
       ...nextProps
     } = props;
 
+    const onError = useCallback((request: TRequestType) => {
+      const { callback, ...nextRequest } = request;
+      return {
+        ...nextRequest,
+        callback(error: any, value: any) {
+          if (!!error) {
+            setFiles((prev) => {
+              return prev.map((item) => {
+                const { name } = item;
+                if (value !== name) return item;
+                return merge({}, item, {
+                  error,
+                });
+              });
+            });
+          }
+        },
+      };
+    }, []);
+
     const taskGenerate = useCallback(
       (file: File) => {
         if (actionUrl) {
@@ -97,13 +117,13 @@ const Upload = memo(
           };
         }
         return {
-          request: request as TRequestType,
+          request: onError(request as TRequestType),
           file: {
             file,
           },
         };
       },
-      [request, actionUrl, withCredentials],
+      [request, actionUrl, withCredentials, onError],
     );
 
     const addTask = useCallback(
@@ -286,6 +306,8 @@ const Upload = memo(
             containerRender={containerRender}
             root={getRootProps<any>({})}
             input={getInputProps<any>({})}
+            maxFiles={nextProps.maxFiles}
+            currentFiles={files.length}
           />
           {!!showUploadList && fileDomList}
         </div>
