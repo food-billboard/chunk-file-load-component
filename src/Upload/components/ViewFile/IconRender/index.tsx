@@ -1,6 +1,12 @@
 import React, { CSSProperties, memo, useMemo } from 'react';
 import classnames from 'classnames';
-import IconMap, { DEFAULT_ICON, formatType } from './icon.map';
+import IconListMap, {
+  DEFAULT_ICON as DEFAULT_LIST_ICON,
+  formatType as listFormatType,
+} from './icon.list.map';
+import IconCardMap, {
+  DEFAULT_ICON as DEFAULT_CARD_ICON,
+} from './icon.card.map';
 import { UploadProps, ViewType, WrapperFile } from '../../../type';
 import styles from './index.less';
 
@@ -20,8 +26,28 @@ const Icon = memo((props: IconProps) => {
 
   const fileType: any = useMemo(() => {
     const type = file.task?.tool.file.getFileType();
-    return formatType(type);
+    return listFormatType(type);
   }, [file]);
+
+  const IconMap = useMemo(() => {
+    switch (viewType) {
+      case 'card':
+        return IconCardMap;
+      case 'list':
+      default:
+        return IconListMap;
+    }
+  }, []);
+
+  const DEFAULT_ICON = useMemo(() => {
+    switch (viewType) {
+      case 'card':
+        return DEFAULT_CARD_ICON;
+      case 'list':
+      default:
+        return DEFAULT_LIST_ICON;
+    }
+  }, []);
 
   const icon = useMemo(() => {
     const Icon = (IconMap as any)[fileType] || DEFAULT_ICON;
@@ -31,7 +57,7 @@ const Icon = memo((props: IconProps) => {
         className={classnames(styles['chunk-upload-view-icon'], className)}
       />
     );
-  }, [fileType]);
+  }, [fileType, IconMap, DEFAULT_ICON]);
 
   return icon;
 });

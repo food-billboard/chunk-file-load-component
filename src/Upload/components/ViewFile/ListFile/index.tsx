@@ -109,6 +109,8 @@ const ListFile = memo((props: ViewDetailProps) => {
     onStop,
     iconRender,
     viewType,
+    style,
+    className,
   } = props;
 
   const list = useMemo(() => {
@@ -131,7 +133,11 @@ const ListFile = memo((props: ViewDetailProps) => {
     });
   }, [value]);
 
-  return <ul className={'chunk-upload-list'}>{list}</ul>;
+  return (
+    <aside style={style} className={className}>
+      <ul className={'chunk-upload-list'}>{list}</ul>
+    </aside>
+  );
 });
 
 export default ListFile;

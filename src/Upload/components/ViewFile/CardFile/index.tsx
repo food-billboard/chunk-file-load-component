@@ -1,5 +1,6 @@
 import React, { memo, useMemo, useState, useContext, useCallback } from 'react';
 import { Button } from 'antd';
+import classnames from 'classnames';
 import {
   PauseCircleOutlined,
   UploadOutlined,
@@ -72,11 +73,20 @@ const ViewItem = memo(
         file={value}
         viewType={viewType!}
       /> */}
-        <div className="chunk-upload-card-item-info">
+        {!isComplete && (
+          <Progress
+            file={value}
+            onChange={onProgressChange}
+            className="chunk-upload-card-item-progress"
+            style={{ flexDirection: 'column', width: '100%' }}
+            showInfo={false}
+          />
+        )}
+        {/* <div className="chunk-upload-card-item-info">
           <Progress file={value} onChange={onProgressChange} />
           <span>{local?.value?.filename || local?.value?.fileId || id}</span>
-        </div>
-        <Button
+        </div> */}
+        {/* <Button
           style={{ visibility: isComplete ? 'hidden' : 'visible' }}
           loading={cancelLoading}
           type="link"
@@ -86,7 +96,7 @@ const ViewItem = memo(
           loading={cancelLoading}
           type="link"
           icon={<DeleteOutlined onClick={handleCancel} />}
-        />
+        /> */}
       </li>
     );
   },
@@ -101,6 +111,8 @@ const CardFile = memo((props: ViewDetailProps) => {
     onStop,
     iconRender,
     viewType,
+    className,
+    style,
   } = props;
 
   const list = useMemo(() => {
@@ -123,7 +135,11 @@ const CardFile = memo((props: ViewDetailProps) => {
     });
   }, [value]);
 
-  return <ul className={'chunk-upload-card'}>{list}</ul>;
+  return (
+    <ul style={style} className={classnames('chunk-upload-card', className)}>
+      {list}
+    </ul>
+  );
 });
 
 export default CardFile;

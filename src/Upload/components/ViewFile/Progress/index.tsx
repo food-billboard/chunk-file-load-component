@@ -31,6 +31,10 @@ const Progress = memo(
       return progress;
     }, [origin, progress, onChange]);
 
+    const realValue = useMemo(() => {
+      return parseFloat(percent.toFixed(1));
+    }, [percent]);
+
     useEffect(() => {
       onChange?.(origin);
     }, [origin]);
@@ -47,11 +51,16 @@ const Progress = memo(
         style={style}
       >
         <AntProgress
-          percent={parseFloat(percent.toFixed(1))}
+          percent={realValue}
           status={!!error ? 'exception' : undefined}
           {...nextProps}
         />
-        <span className="chunk-upload-list-progress-status">{status}</span>
+        <span
+          className="chunk-upload-list-progress-status"
+          title={origin.step as any}
+        >
+          {status}
+        </span>
       </div>
     );
   },

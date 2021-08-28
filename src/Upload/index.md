@@ -11,37 +11,46 @@ let max = -1;
 let chunkSize = 0;
 let size = 0;
 
+//mock local server
+let mockCache = {};
+
 const sleep = (times = 500) =>
   new Promise((resolve) => setTimeout(resolve, times));
 
 export default () => {
   const uploadRef = useRef();
 
-  const exitDataFn = async (params: {
-    filename: string;
-    md5: string;
-    suffix: string;
-    size: number;
-    chunkSize: number;
-    chunksLength: number;
-  }) => {
+  const exitDataFn = async (
+    params: {
+      filename: string;
+      md5: string;
+      suffix: string;
+      size: number;
+      chunkSize: number;
+      chunksLength: number;
+    },
+    name: Symbol,
+  ) => {
     await sleep();
     console.log('exitDataFn', params);
-    max = params.chunksLength;
-    chunkSize = params.chunkSize;
-    size = params.size;
-    const nextOffset = index * chunkSize;
+    mockCache[name] = {
+      max: params.chunksLength,
+      chunkSize: params.chunkSize,
+      size: params.size,
+      index: 0,
+    };
     //Mock server response
     return {
-      data: nextOffset >= size ? size : nextOffset,
+      data: 0,
     };
   };
 
   const uploadFn = async (data: FormData, name: Symbol) => {
     await sleep();
     console.log('uploadFn', data, name);
-    index++;
-    const nextOffset = index * chunkSize;
+    const size = mockCache[name].size;
+    mockCache[name].index++;
+    const nextOffset = mockCache[name].index * mockCache[name].chunkSize;
     //Mock server response
     return {
       data: nextOffset >= size ? size : nextOffset,
@@ -51,6 +60,7 @@ export default () => {
   const completeFn = async (data: any) => {
     await sleep();
     console.log('completeFn', data);
+    mockCache[data.name] = {};
   };
 
   return (
@@ -58,7 +68,7 @@ export default () => {
       ref={uploadRef}
       immediately={false}
       onRemove={sleep.bind(null, 1000)}
-      viewType="card"
+      viewType="list"
       request={{
         exitDataFn,
         uploadFn,
@@ -68,7 +78,6 @@ export default () => {
           if (!err) {
             console.log('Upload Done!!');
           }
-          index = 0;
         },
       }}
     />

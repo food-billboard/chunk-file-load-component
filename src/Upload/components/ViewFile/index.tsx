@@ -1,11 +1,9 @@
-import React, { memo, useCallback, useMemo } from 'react';
-import classnames from 'classnames';
+import React, { CSSProperties, memo, useCallback, useMemo } from 'react';
 import Card from './CardFile';
 import List from './ListFile';
 import { ViewFileProps, WrapperFile } from '@/Upload/type';
 import { withTry } from '@/utils';
 import { isUploaded } from '@/Upload/utils';
-import styles from '../../index.less';
 
 export type CancelMethod = (task: WrapperFile) => Promise<boolean>;
 export type UploadMethod = (task: WrapperFile) => void;
@@ -20,16 +18,7 @@ export type ViewDetailProps = Omit<
 };
 
 export default memo((props: ViewFileProps) => {
-  const {
-    viewType,
-    className,
-    style,
-    onChange,
-    onRemove,
-    instance,
-    value,
-    ...nextProps
-  } = props;
+  const { viewType, onChange, onRemove, instance, value, ...nextProps } = props;
 
   const onCancel: CancelMethod = useCallback(
     async (task) => {
@@ -96,13 +85,6 @@ export default memo((props: ViewFileProps) => {
     [instance],
   );
 
-  const viewProps = useMemo(() => {
-    return {
-      style: style || {},
-      className: classnames(styles['chunk-upload-list'], className),
-    };
-  }, [className, style]);
-
   const container = useMemo(() => {
     const props = {
       ...nextProps,
@@ -121,5 +103,5 @@ export default memo((props: ViewFileProps) => {
     }
   }, [viewType, nextProps, onCancel, onStop, onUpload, value]);
 
-  return <aside {...viewProps}>{container}</aside>;
+  return container;
 });
