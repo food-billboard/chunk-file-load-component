@@ -8,6 +8,7 @@ import React, {
   useEffect,
   createContext,
 } from 'react';
+import classnames from 'classnames';
 import { useDropzone, DropzoneOptions } from 'react-dropzone';
 import { merge } from 'lodash-es';
 import { nanoid } from 'nanoid';
@@ -79,6 +80,7 @@ const Upload = memo(
       locale,
       iconRender,
       itemRender,
+      previewFile,
       ...nextProps
     } = props;
 
@@ -234,6 +236,7 @@ const Upload = memo(
           onRemove={onRemove}
           iconRender={iconRender}
           itemRender={itemRender}
+          previewFile={previewFile}
         />
       );
     }, [
@@ -292,7 +295,12 @@ const Upload = memo(
 
     return (
       <Provider value={contextValue}>
-        <div className={'chunk-upload-container'}>
+        <div
+          className={classnames('chunk-upload-container', {
+            ['chunk-upload-container-list']: viewType === 'list',
+            ['chunk-upload-container-card']: viewType === 'card',
+          })}
+        >
           <Container
             viewType={viewType}
             isDragAccept={isDragAccept}

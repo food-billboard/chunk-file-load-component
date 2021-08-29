@@ -12,9 +12,10 @@ const Progress = memo(
     props: Partial<ProgressProps> & {
       file: WrapperFile;
       onChange?: (progress: ProgressType) => void;
+      fixed?: number;
     },
   ) => {
-    const { file, className, style, onChange, ...nextProps } = props;
+    const { file, className, style, onChange, fixed = 0, ...nextProps } = props;
     const { name, error } = file;
 
     const [, , progress, origin] = useProgress(name);
@@ -32,8 +33,8 @@ const Progress = memo(
     }, [origin, progress, onChange]);
 
     const realValue = useMemo(() => {
-      return parseFloat(percent.toFixed(1));
-    }, [percent]);
+      return parseFloat(percent.toFixed(fixed));
+    }, [percent, fixed]);
 
     useEffect(() => {
       onChange?.(origin);

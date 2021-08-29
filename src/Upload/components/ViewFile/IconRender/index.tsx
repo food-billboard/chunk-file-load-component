@@ -15,6 +15,7 @@ export interface IconProps extends Pick<UploadProps, 'iconRender'> {
   className?: string;
   file: WrapperFile;
   viewType: ViewType;
+  onClick?: (e: any) => void;
 }
 
 const Icon = memo((props: IconProps) => {

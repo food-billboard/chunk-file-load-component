@@ -64,12 +64,16 @@ export interface UploadProps
       stop: Function;
     },
   ) => ReactNode;
+  previewFile?: (file: WrapperFile, viewType: ViewType) => ReactNode;
   showUploadList?:
     | boolean
     | {
         showPreviewIcon?: boolean;
         showRemoveIcon?: boolean;
+        showUploadIcon?: boolean;
         removeIcon?: ReactNode | ((file: WrapperFile) => ReactNode);
+        previewIcon?: ReactNode | ((file: WrapperFile) => ReactNode);
+        uploadIcon?: ReactNode | ((file: WrapperFile) => ReactNode);
       };
   containerRender?: (action: {
     isDragAccept: boolean;
@@ -113,7 +117,12 @@ export interface UploadInstance {
 export interface ViewFileProps
   extends Pick<
     UploadProps,
-    'viewType' | 'showUploadList' | 'iconRender' | 'itemRender' | 'onRemove'
+    | 'viewType'
+    | 'showUploadList'
+    | 'iconRender'
+    | 'itemRender'
+    | 'onRemove'
+    | 'previewFile'
   > {
   instance: Upload;
   value: WrapperFile[];
