@@ -1,13 +1,18 @@
-import React, { CSSProperties, memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useContext, useMemo } from 'react';
 import Card from './CardFile';
 import List from './ListFile';
-import { ViewFileProps, WrapperFile } from '@/Upload/type';
+import {
+  ViewFileProps,
+  WrapperFile,
+  UploadProps,
+  UploadContext,
+} from '@/Upload';
 import { withTry } from '@/utils';
 import { isUploaded } from '@/Upload/utils';
 
 export type CancelMethod = (task: WrapperFile) => Promise<boolean>;
-export type UploadMethod = (task: WrapperFile) => void;
-export type StopMethod = UploadMethod;
+export type UploadMethod = (task: WrapperFile) => Promise<void>;
+export type StopMethod = (task: WrapperFile) => void;
 export type ViewDetailProps = Omit<
   ViewFileProps,
   'instance' | 'onRemove' | 'onChange'
@@ -17,8 +22,57 @@ export type ViewDetailProps = Omit<
   onStop: StopMethod;
 };
 
+export const actionIconPerformance = (
+  showUploadList: UploadProps['showUploadList'],
+  value: WrapperFile,
+) => {
+  let previewShow = true;
+  let previewIconNode: any = null;
+  let uploadShow = true;
+  let uploadIconNode: any = null;
+  let deleteShow = true;
+  let deleteIconNode: any = null;
+  let stopIconNode: any = null;
+  if (typeof showUploadList === 'object') {
+    const {
+      showPreviewIcon,
+      showRemoveIcon,
+      showUploadIcon,
+      previewIcon,
+      removeIcon,
+      uploadIcon,
+      stopIcon,
+    } = showUploadList;
+    previewShow = !!showPreviewIcon;
+    previewIconNode =
+      !!previewShow &&
+      (typeof previewIcon === 'function' ? previewIcon(value) : previewIcon);
+    uploadShow = !!showUploadIcon;
+    uploadIconNode =
+      !!uploadShow &&
+      (typeof uploadIcon === 'function' ? uploadIcon(value) : uploadIcon);
+    stopIconNode =
+      !!uploadShow &&
+      (typeof stopIcon === 'function' ? stopIcon(value) : stopIcon);
+    deleteShow = !!showRemoveIcon;
+    deleteIconNode =
+      !!deleteShow &&
+      (typeof removeIcon === 'function' ? removeIcon(value) : removeIcon);
+  }
+  return {
+    previewShow,
+    previewIconNode,
+    uploadShow,
+    uploadIconNode,
+    deleteShow,
+    deleteIconNode,
+    stopIconNode,
+  };
+};
+
 export default memo((props: ViewFileProps) => {
   const { viewType, onChange, onRemove, instance, value, ...nextProps } = props;
+  const { setValue } = useContext(UploadContext);
 
   const onCancel: CancelMethod = useCallback(
     async (task) => {
@@ -26,7 +80,7 @@ export default memo((props: ViewFileProps) => {
         const [cancel, isCancel] = await withTry(onRemove)(task);
         if (!!cancel || isCancel === false) return false;
       }
-      const { local } = task;
+      const { local, error } = task;
       if (!isUploaded(task)) {
         const fileTask = task.task!;
         let result = [];
@@ -35,7 +89,7 @@ export default memo((props: ViewFileProps) => {
         } else {
           result = instance.cancelAdd(fileTask.symbol);
         }
-        if (!result.length) {
+        if (!result.length && !error) {
           console.warn(
             'the task is not cancel, please check whether this task is reasonable',
           );
@@ -66,14 +120,29 @@ export default memo((props: ViewFileProps) => {
   );
 
   const onUpload: UploadMethod = useCallback(
-    (task) => {
+    async (task) => {
       if (!isUploaded(task)) {
         const fileTask = task.task!;
         let result = [];
+        const { error } = task;
         if (task.task?.tool.file.isStop(task.task)) {
           result = instance.start(fileTask.symbol);
-        } else {
+        } else if (!error) {
           result = instance.deal(fileTask.symbol);
+        } else if (task.task) {
+          setValue(
+            (prev: WrapperFile[]) => {
+              return prev.map((item) => {
+                if (item.id !== task.id) return item;
+                return {
+                  ...item,
+                  error: null,
+                };
+              });
+            },
+            () => {},
+          );
+          result = instance.uploading(task.task);
         }
         if (!result.length) {
           console.warn(
@@ -82,7 +151,7 @@ export default memo((props: ViewFileProps) => {
         }
       }
     },
-    [instance],
+    [instance, setValue],
   );
 
   const container = useMemo(() => {

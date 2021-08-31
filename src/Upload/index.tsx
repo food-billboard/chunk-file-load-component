@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import classnames from 'classnames';
 import { useDropzone, DropzoneOptions } from 'react-dropzone';
-import { merge } from 'lodash-es';
+import { merge, noop } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { Upload as ChunkFileUpload } from 'chunk-file-upload';
 import {
@@ -21,7 +21,12 @@ import {
 import Container from './components/Container';
 import ViewFile from './components/ViewFile';
 import { DEFAULT_DROP_PROPS, LIFE_CYCLE_ENUM } from './constants';
-import { customAction, propsValueFormat, Emitter } from './utils';
+import {
+  customAction,
+  propsValueFormat,
+  Emitter,
+  useStateChange,
+} from './utils';
 import {
   UploadProps,
   UploadInstance,
@@ -50,13 +55,14 @@ export const UploadContext = createContext<UploadContextType>({
   instance: {} as any,
   emitter,
   locale: {},
+  setValue: noop,
 });
 
 const { Provider } = UploadContext;
 
 const Upload = memo(
   forwardRef<UploadInstance, UploadProps>((props, ref) => {
-    const [files, setFiles] = useState<WrapperFile[]>([]);
+    const [files, setFiles] = useStateChange<WrapperFile[]>([]);
     const [uploadInstance, setUploadInstance] = useState<UploadInstanceType>();
 
     const {
@@ -107,12 +113,14 @@ const Upload = memo(
     const taskGenerate = useCallback(
       (file: File) => {
         if (actionUrl) {
+          const { request, ...nextAction } = customAction({
+            url: actionUrl,
+            instance: uploadInstance!,
+            withCredentials: !!withCredentials,
+          });
           return {
-            ...customAction({
-              url: actionUrl,
-              instance: uploadInstance!,
-              withCredentials: !!withCredentials,
-            }),
+            request: onError(request as TRequestType),
+            ...nextAction,
             file: {
               file,
             },
@@ -255,6 +263,7 @@ const Upload = memo(
         instance: uploadInstance!,
         emitter,
         locale,
+        setValue: setFiles,
       };
     }, [uploadInstance, locale]);
 

@@ -23,6 +23,7 @@ import {
   UploadMethod,
   StopMethod,
   ViewDetailProps,
+  actionIconPerformance,
 } from '../index';
 import { itemRender } from '@/Upload/utils';
 import './index.less';
@@ -64,8 +65,8 @@ const ViewItem = (
     onStop(value);
   }, [value, onStop]);
 
-  const handleUpload = useCallback(() => {
-    onUpload(value);
+  const handleUpload = useCallback(async () => {
+    await onUpload(value);
   }, [value, onUpload]);
 
   const handleCancel = useCallback(async () => {
@@ -74,12 +75,15 @@ const ViewItem = (
     !result && setCancelLoading(false);
   }, [value, onCancel]);
 
-  const uploadButtonAction = useMemo(() => {
-    if (isDealing) {
-      return <PauseCircleOutlined onClick={handleStop} />;
-    }
-    return <UploadOutlined onClick={handleUpload} />;
-  }, [isDealing, handleUpload, handleStop]);
+  const uploadButtonAction = useCallback(
+    (uploadIcon: any, stopIcon: any) => {
+      if (isDealing) {
+        return stopIcon || <PauseCircleOutlined />;
+      }
+      return uploadIcon || <UploadOutlined />;
+    },
+    [isDealing],
+  );
 
   const onProgressChange = useCallback(() => {
     const isDealing = !!task?.tool.file.isTaskDealing(task);
@@ -93,35 +97,16 @@ const ViewItem = (
   }, []);
 
   const actionRender = useMemo(() => {
-    let previewShow = true;
-    let previewIconNode: any = null;
-    let uploadShow = true;
-    let uploadIconNode: any = null;
-    let deleteShow = true;
-    let deleteIconNode: any = null;
     if (!showUploadList) return null;
-    if (typeof showUploadList === 'object') {
-      const {
-        showPreviewIcon,
-        showRemoveIcon,
-        showUploadIcon,
-        previewIcon,
-        removeIcon,
-        uploadIcon,
-      } = showUploadList;
-      previewShow = !!showPreviewIcon;
-      previewIconNode =
-        !!previewShow &&
-        (typeof previewIcon === 'function' ? previewIcon(value) : previewIcon);
-      uploadShow = !!showUploadIcon;
-      uploadIconNode =
-        !!uploadShow &&
-        (typeof uploadIcon === 'function' ? uploadIcon(value) : uploadIcon);
-      deleteShow = !!showRemoveIcon;
-      deleteIconNode =
-        !!deleteShow &&
-        (typeof removeIcon === 'function' ? removeIcon(value) : removeIcon);
-    }
+    const {
+      uploadIconNode,
+      uploadShow,
+      stopIconNode,
+      deleteShow,
+      deleteIconNode,
+      previewIconNode,
+      previewShow,
+    } = actionIconPerformance(showUploadList, value);
     return (
       <>
         {uploadShow && (
@@ -130,7 +115,8 @@ const ViewItem = (
             style={{ visibility: isComplete ? 'hidden' : 'visible' }}
             loading={cancelLoading}
             type="link"
-            icon={uploadIconNode || uploadButtonAction}
+            onClick={isDealing ? handleStop : handleUpload}
+            icon={uploadButtonAction(uploadIconNode, stopIconNode)}
           />
         )}
         {deleteShow && (
@@ -160,6 +146,7 @@ const ViewItem = (
     onPreview,
     uploadButtonAction,
     showUploadList,
+    isDealing,
   ]);
 
   return (

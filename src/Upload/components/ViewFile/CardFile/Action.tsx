@@ -17,13 +17,15 @@ import {
 } from '@ant-design/icons';
 import { WrapperFile, UploadProps } from '@/Upload';
 import PreviewModal, { PreviewModalRef } from '../../Preview';
-import { CancelMethod } from '../index';
+import { CancelMethod, actionIconPerformance } from '../index';
+import { className } from '@/utils';
 
 export const LoadingIcon = memo(
   (props: {
     loading?: boolean;
     icon: ReactNode;
     onClick?: any;
+    prefix: string;
     loadingProps?: {
       style?: CSSProperties;
       className?: string;
@@ -31,13 +33,22 @@ export const LoadingIcon = memo(
       [key: string]: any;
     };
   }) => {
-    const { loading, icon, loadingProps = {}, onClick } = props;
+    const { loading, icon, loadingProps = {}, prefix, onClick } = props;
 
     if (!!loading) {
-      return <LoadingOutlined {...loadingProps} />;
+      return (
+        <LoadingOutlined
+          className={className(prefix, 'icon')}
+          {...loadingProps}
+        />
+      );
     }
 
-    return <span onClick={onClick}>{icon}</span>;
+    return (
+      <span className={className(prefix, 'icon')} onClick={onClick}>
+        {icon}
+      </span>
+    );
   },
 );
 
@@ -66,11 +77,13 @@ const ActionModal = memo(
       value,
       previewFile,
     } = props;
-    const { task, local, id, error } = value;
+    const { error } = value;
 
     const [cancelLoading, setCancelLoading] = useState<boolean>(false);
 
     const previewRef = useRef<PreviewModalRef>(null);
+
+    const prefix = 'chunk-upload-action-modal';
 
     const handleCancel = useCallback(async () => {
       setCancelLoading(true);
@@ -83,22 +96,24 @@ const ActionModal = memo(
     }, [previewRef]);
 
     const uploadButtonAction = useCallback(
-      (icon: any) => {
+      (uploadIcon: any, stopIcon: any) => {
         if (isComplete) return null;
         if (isDealing) {
           return (
             <LoadingIcon
               onClick={onStop}
-              icon={icon || <PauseCircleOutlined />}
+              icon={stopIcon || <PauseCircleOutlined />}
               loading={cancelLoading}
+              prefix={prefix}
             />
           );
         }
         return (
           <LoadingIcon
             onClick={onUpload}
-            icon={icon || <UploadOutlined />}
+            icon={uploadIcon || <UploadOutlined />}
             loading={cancelLoading}
+            prefix={prefix}
           />
         );
       },
@@ -106,45 +121,25 @@ const ActionModal = memo(
     );
 
     const actionRender = useMemo(() => {
-      let previewShow = true;
-      let previewIconNode: any = null;
-      let uploadShow = true;
-      let uploadIconNode: any = null;
-      let deleteShow = true;
-      let deleteIconNode: any = null;
       if (!showUploadList) return null;
-      if (typeof showUploadList === 'object') {
-        const {
-          showPreviewIcon,
-          showRemoveIcon,
-          showUploadIcon,
-          previewIcon,
-          removeIcon,
-          uploadIcon,
-        } = showUploadList;
-        previewShow = !!showPreviewIcon;
-        previewIconNode =
-          !!previewShow &&
-          (typeof previewIcon === 'function'
-            ? previewIcon(value)
-            : previewIcon);
-        uploadShow = !!showUploadIcon;
-        uploadIconNode =
-          !!uploadShow &&
-          (typeof uploadIcon === 'function' ? uploadIcon(value) : uploadIcon);
-        deleteShow = !!showRemoveIcon;
-        deleteIconNode =
-          !!deleteShow &&
-          (typeof removeIcon === 'function' ? removeIcon(value) : removeIcon);
-      }
+      const {
+        previewShow,
+        previewIconNode,
+        deleteIconNode,
+        deleteShow,
+        uploadShow,
+        uploadIconNode,
+        stopIconNode,
+      } = actionIconPerformance(showUploadList, value);
       return (
         <>
-          {uploadShow && uploadButtonAction(uploadIconNode)}
+          {uploadShow && uploadButtonAction(uploadIconNode, stopIconNode)}
           {deleteShow && (
             <LoadingIcon
               loading={cancelLoading}
               onClick={handleCancel}
               icon={deleteIconNode || <DeleteOutlined />}
+              prefix={prefix}
             />
           )}
           {previewShow && (
@@ -152,6 +147,7 @@ const ActionModal = memo(
               onClick={onPreview}
               icon={previewIconNode || <EyeOutlined />}
               loading={cancelLoading}
+              prefix={prefix}
             />
           )}
         </>
@@ -168,10 +164,7 @@ const ActionModal = memo(
     ]);
 
     return (
-      <div
-        style={style}
-        className={classnames('chunk-upload-action-modal', className)}
-      >
+      <div style={style} className={classnames(prefix, className)}>
         {actionRender}
         <PreviewModal
           ref={previewRef}

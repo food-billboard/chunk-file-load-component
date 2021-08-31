@@ -74,6 +74,7 @@ export interface UploadProps
         removeIcon?: ReactNode | ((file: WrapperFile) => ReactNode);
         previewIcon?: ReactNode | ((file: WrapperFile) => ReactNode);
         uploadIcon?: ReactNode | ((file: WrapperFile) => ReactNode);
+        stopIcon?: ReactNode | ((file: WrapperFile) => ReactNode);
       };
   containerRender?: (action: {
     isDragAccept: boolean;
@@ -135,6 +136,7 @@ export interface UploadContextType {
   instance: Upload;
   emitter: Emitter;
   locale: UploadProps['locale'];
+  setValue: any;
 }
 
 export type FileTaskProgress = Map<Symbol, Required<TWrapperTask['process']>>;

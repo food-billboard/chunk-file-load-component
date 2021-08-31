@@ -42,6 +42,8 @@ ul {
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
+        width: 100%;
+        text-align: center;
       }
     }
     .chunk-upload-action-modal {
@@ -60,7 +62,7 @@ ul {
     &:hover .chunk-upload-action-modal {
       visibility: visible;
       opacity: 1;
-      .anticon {
+      &-icon {
         color: rgba(255, 255, 255, 0.8);
         margin-right: 8px;
         font-size: 1.2em;
@@ -68,7 +70,7 @@ ul {
           color: white;
         }
       }
-      .anticon:nth-last-of-type(1) {
+      &-icon:nth-last-of-type(1) {
         margin-right: 0;
       }
     }

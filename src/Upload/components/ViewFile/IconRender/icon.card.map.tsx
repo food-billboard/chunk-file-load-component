@@ -1,5 +1,5 @@
+import React, { memo, CSSProperties } from 'react';
 import {
-  FileImageTwoTone,
   FileMarkdownTwoTone,
   FilePdfTwoTone,
   FilePptTwoTone,
@@ -14,6 +14,12 @@ import {
 } from '@ant-design/icons';
 
 export const DEFAULT_ICON = FileTwoTone;
+
+const FileImageTwoTone = memo(
+  (props: { className?: string; style?: CSSProperties; iconRender?: any }) => {
+    return <div></div>;
+  },
+);
 
 const IconMap = {
   image: FileImageTwoTone,

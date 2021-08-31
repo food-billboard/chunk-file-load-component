@@ -31,6 +31,7 @@ const ViewItem = memo(
       onStop,
       previewFile,
       iconRender,
+      showUploadList,
     } = props;
     const { task, local, id } = value;
 
@@ -38,8 +39,8 @@ const ViewItem = memo(
       onStop(value);
     }, [value, onStop]);
 
-    const handleUpload = useCallback(() => {
-      onUpload(value);
+    const handleUpload = useCallback(async () => {
+      await onUpload(value);
     }, [value, onUpload]);
 
     const onProgressChange = useCallback(() => {
@@ -77,6 +78,7 @@ const ViewItem = memo(
           isComplete={isComplete}
           value={value}
           previewFile={previewFile}
+          showUploadList={showUploadList}
         />
       </div>
     );
