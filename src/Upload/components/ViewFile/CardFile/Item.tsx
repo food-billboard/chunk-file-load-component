@@ -79,6 +79,7 @@ const ViewItem = memo(
           value={value}
           previewFile={previewFile}
           showUploadList={showUploadList}
+          viewType={viewType}
         />
       </div>
     );

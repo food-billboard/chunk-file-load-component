@@ -21,18 +21,14 @@ import {
 import Container from './components/Container';
 import ViewFile from './components/ViewFile';
 import { DEFAULT_DROP_PROPS, LIFE_CYCLE_ENUM } from './constants';
-import {
-  customAction,
-  propsValueFormat,
-  Emitter,
-  useStateChange,
-} from './utils';
+import { customAction, propsValueFormat, Emitter } from './utils';
 import {
   UploadProps,
   UploadInstance,
   WrapperFile,
   UploadContextType,
 } from './type';
+import { useStateChange } from '@/utils';
 import './index.less';
 
 export { request } from '../utils/request';

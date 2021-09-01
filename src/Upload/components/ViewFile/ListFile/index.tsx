@@ -51,7 +51,7 @@ const ViewItem = (
 
   const {
     value,
-    viewType,
+    viewType = 'list',
     onCancel,
     onUpload,
     onStop,
@@ -170,6 +170,7 @@ const ViewItem = (
         ref={previewModalRef}
         value={value}
         previewFile={previewFile}
+        viewType={viewType}
       />
     </li>
   );

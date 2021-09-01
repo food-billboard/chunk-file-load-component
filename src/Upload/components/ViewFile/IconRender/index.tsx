@@ -8,7 +8,7 @@ import IconCardMap, {
   DEFAULT_ICON as DEFAULT_CARD_ICON,
 } from './icon.card.map';
 import { UploadProps, ViewType, WrapperFile } from '../../../type';
-import styles from './index.less';
+import './index.less';
 
 export interface IconProps extends Pick<UploadProps, 'iconRender'> {
   style?: CSSProperties;
@@ -26,7 +26,7 @@ const Icon = memo((props: IconProps) => {
   }
 
   const fileType: any = useMemo(() => {
-    const type = file.task?.tool.file.getFileType();
+    const type = file.task?.tool.file.getFileType(file.task);
     return listFormatType(type);
   }, [file]);
 
@@ -55,7 +55,14 @@ const Icon = memo((props: IconProps) => {
     return (
       <Icon
         style={style}
-        className={classnames(styles['chunk-upload-view-icon'], className)}
+        className={classnames(
+          {
+            ['chunk-upload-view-list-icon']: viewType === 'list',
+            ['chunk-upload-view-card-icon']: viewType === 'card',
+          },
+          className,
+        )}
+        file={file}
       />
     );
   }, [fileType, IconMap, DEFAULT_ICON]);

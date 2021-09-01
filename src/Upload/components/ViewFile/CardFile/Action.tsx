@@ -64,6 +64,7 @@ const ActionModal = memo(
     value: WrapperFile;
     previewFile: UploadProps['previewFile'];
     showUploadList: UploadProps['showUploadList'];
+    viewType: UploadProps['viewType'];
   }) => {
     const {
       showUploadList,
@@ -76,6 +77,7 @@ const ActionModal = memo(
       isComplete,
       value,
       previewFile,
+      viewType = 'list',
     } = props;
     const { error } = value;
 
@@ -170,6 +172,7 @@ const ActionModal = memo(
           ref={previewRef}
           value={value}
           previewFile={previewFile}
+          viewType={viewType}
         />
       </div>
     );
