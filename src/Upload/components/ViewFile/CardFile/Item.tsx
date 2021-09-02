@@ -1,4 +1,10 @@
-import React, { memo, useState, useContext, useCallback } from 'react';
+import React, {
+  memo,
+  useState,
+  useContext,
+  useCallback,
+  useEffect,
+} from 'react';
 import Progress from '../Progress';
 import ActionModal from './Action';
 import { UploadContext, WrapperFile, UploadProps } from '@/Upload';
@@ -50,6 +56,10 @@ const ViewItem = memo(
       setIsComplete(isComplete);
     }, [task, instance]);
 
+    useEffect(() => {
+      setIsComplete(value.local?.type === 'url');
+    }, [value]);
+
     return (
       <div className={'chunk-upload-card-item'}>
         <Icon
@@ -65,6 +75,7 @@ const ViewItem = memo(
             className="chunk-upload-card-item-progress"
             style={{ flexDirection: 'column', width: '100%' }}
             showInfo={false}
+            strokeWidth={5}
           />
         )}
         <div className="chunk-upload-card-item-info">

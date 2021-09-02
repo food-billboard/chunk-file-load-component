@@ -19,38 +19,7 @@ import { WrapperFile, UploadProps } from '@/Upload';
 import PreviewModal, { PreviewModalRef } from '../../Preview';
 import { CancelMethod, actionIconPerformance } from '../index';
 import { className } from '@/utils';
-
-export const LoadingIcon = memo(
-  (props: {
-    loading?: boolean;
-    icon: ReactNode;
-    onClick?: any;
-    prefix: string;
-    loadingProps?: {
-      style?: CSSProperties;
-      className?: string;
-      onClick?: any;
-      [key: string]: any;
-    };
-  }) => {
-    const { loading, icon, loadingProps = {}, prefix, onClick } = props;
-
-    if (!!loading) {
-      return (
-        <LoadingOutlined
-          className={className(prefix, 'icon')}
-          {...loadingProps}
-        />
-      );
-    }
-
-    return (
-      <span className={className(prefix, 'icon')} onClick={onClick}>
-        {icon}
-      </span>
-    );
-  },
-);
+import { Button } from 'antd';
 
 const ActionModal = memo(
   (props: {
@@ -102,20 +71,20 @@ const ActionModal = memo(
         if (isComplete) return null;
         if (isDealing) {
           return (
-            <LoadingIcon
+            <Button
               onClick={onStop}
               icon={stopIcon || <PauseCircleOutlined />}
               loading={cancelLoading}
-              prefix={prefix}
+              type="link"
             />
           );
         }
         return (
-          <LoadingIcon
+          <Button
             onClick={onUpload}
             icon={uploadIcon || <UploadOutlined />}
             loading={cancelLoading}
-            prefix={prefix}
+            type={'link'}
           />
         );
       },
@@ -137,19 +106,20 @@ const ActionModal = memo(
         <>
           {uploadShow && uploadButtonAction(uploadIconNode, stopIconNode)}
           {deleteShow && (
-            <LoadingIcon
+            <Button
               loading={cancelLoading}
               onClick={handleCancel}
               icon={deleteIconNode || <DeleteOutlined />}
-              prefix={prefix}
+              type="link"
             />
           )}
           {previewShow && (
-            <LoadingIcon
+            <Button
               onClick={onPreview}
               icon={previewIconNode || <EyeOutlined />}
               loading={cancelLoading}
-              prefix={prefix}
+              type="link"
+              disabled={!value.local?.value?.preview}
             />
           )}
         </>

@@ -5,6 +5,7 @@ import React, {
   useState,
   useContext,
   useRef,
+  useEffect,
 } from 'react';
 import {
   DeleteOutlined,
@@ -124,7 +125,8 @@ const ViewItem = (
             loading={cancelLoading}
             type="link"
             danger={!!error}
-            icon={deleteIconNode || <DeleteOutlined onClick={handleCancel} />}
+            onClick={handleCancel}
+            icon={deleteIconNode || <DeleteOutlined />}
           />
         )}
         {previewShow && (
@@ -132,7 +134,9 @@ const ViewItem = (
             loading={cancelLoading}
             type="link"
             danger={!!error}
-            icon={previewIconNode || <EyeOutlined onClick={onPreview} />}
+            onClick={onPreview}
+            icon={previewIconNode || <EyeOutlined />}
+            disabled={!value.local?.value?.preview}
           />
         )}
       </>
@@ -148,6 +152,10 @@ const ViewItem = (
     showUploadList,
     isDealing,
   ]);
+
+  useEffect(() => {
+    setIsComplete(value.local?.type === 'url');
+  }, [value]);
 
   return (
     <li className={'chunk-upload-list-item'}>

@@ -174,17 +174,100 @@ export default () => {
 };
 ```
 
+上传受控:
+
+```tsx
+import React, { useRef, useState } from 'react';
+import { Upload } from 'chunk-file-load-component';
+
+//mock local server
+let mockCache = {};
+
+const sleep = (times = 500) =>
+  new Promise((resolve) => setTimeout(resolve, times));
+
+export default () => {
+  const [uploadValue, setUploadValue] = useState([]);
+
+  const exitDataFn = async (
+    params: {
+      filename: string;
+      md5: string;
+      suffix: string;
+      size: number;
+      chunkSize: number;
+      chunksLength: number;
+    },
+    name: Symbol,
+  ) => {
+    await sleep();
+    console.log('exitDataFn', params);
+    mockCache[name] = {
+      max: params.chunksLength,
+      chunkSize: params.chunkSize,
+      size: params.size,
+      index: 0,
+    };
+    //Mock server response
+    return {
+      data: 0,
+    };
+  };
+
+  const uploadFn = async (data: FormData, name: Symbol) => {
+    await sleep();
+    console.log('uploadFn', data, name);
+    const size = mockCache[name].size;
+    mockCache[name].index++;
+    const nextOffset = mockCache[name].index * mockCache[name].chunkSize;
+    //Mock server response
+    return {
+      data: nextOffset >= size ? size : nextOffset,
+    };
+  };
+
+  const completeFn = async (data: any) => {
+    await sleep();
+    console.log('completeFn', data);
+    mockCache[data.name] = {};
+  };
+
+  const onChange = (value) => {
+    setUploadValue(value);
+    console.log('upload value changed', value);
+  };
+
+  return (
+    <>
+      <Upload
+        immediately={false}
+        onRemove={sleep.bind(null, 1000)}
+        viewType="list"
+        value={uploadValue}
+        onChange={onChange}
+        request={{
+          exitDataFn,
+          uploadFn,
+          completeFn,
+          callback(err, value) {
+            console.log(err, value);
+            if (!err) {
+              console.log('Upload Done!!');
+            }
+          },
+        }}
+      />
+    </>
+  );
+};
+```
+
 <!-- 生命周期:
 ```tsx
 
 ```
 
 自定义请求:
-```tsx
-
-```
-
-上传受控:
 ```tsx
 
 ```
@@ -205,8 +288,8 @@ export default () => {
 
 | 参数            | 说明                                                                                                                                            | 类型                                                                                                                                                                                                                                                                                                                                              | 默认值                                  |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| defaultValue    | 默认值                                                                                                                                          | `string` &#124; `string[]` &#124; `WrapperFile` &#124; `WrapperFile[]`                                                                                                                                                                                                                                                                            | -                                       |
-| value           | 文件列表                                                                                                                                        | `string` &#124; `string[]` &#124; `WrapperFile` &#124; `WrapperFile[]`                                                                                                                                                                                                                                                                            | -                                       |
+| defaultValue    | 默认值                                                                                                                                          | `string` &#124; `string[]` &#124; `PartialWrapperFile` &#124; `PartialWrapperFile[]`                                                                                                                                                                                                                                                              | -                                       |
+| value           | 文件列表                                                                                                                                        | `string` &#124; `string[]` &#124; `PartialWrapperFile` &#124; `PartialWrapperFile[]`                                                                                                                                                                                                                                                              | -                                       |
 | onChange        | 文件列表变化时的回调                                                                                                                            | `(value: WrapperFile[]) => void`                                                                                                                                                                                                                                                                                                                  | -                                       |
 | onRemove        | 点击移除文件时的回调，返回值为 false 时不移除。支持返回一个 Promise 对象，Promise 对象 resolve(false) 或 reject 时不移除                        | `(task: WrapperFile) => (boolean \| Promise)`                                                                                                                                                                                                                                                                                                     | -                                       |
 | viewStyle       | 自定义文件列表样式                                                                                                                              | `CSSProperties`                                                                                                                                                                                                                                                                                                                                   | -                                       |

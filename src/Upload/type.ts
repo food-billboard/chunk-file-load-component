@@ -27,6 +27,8 @@ export type WrapperFile = {
   error?: any;
 };
 
+export type PartialWrapperFile = Partial<WrapperFile>;
+
 export type ViewType = 'card' | 'list';
 
 type PickDropProps =
@@ -41,7 +43,7 @@ type PickDropProps =
 export interface UploadProps
   extends Pick<DropzoneOptions, PickDropProps>,
     Partial<Pick<Ttask, 'request' | 'lifecycle'>> {
-  defaultValue?: string | string[] | WrapperFile | WrapperFile[];
+  defaultValue?: string | string[] | PartialWrapperFile | PartialWrapperFile[];
   value?: UploadProps['defaultValue'];
   onChange?: (value: WrapperFile[]) => void;
   onRemove?: (task: WrapperFile) => boolean | Promise<boolean>;
@@ -140,3 +142,9 @@ export interface UploadContextType {
 }
 
 export type FileTaskProgress = Map<Symbol, Required<TWrapperTask['process']>>;
+
+export type CustomActionRequest = () => {};
+
+export type CustomAction = {
+  request: CustomActionRequest;
+};

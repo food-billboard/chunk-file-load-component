@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import classnames from 'classnames';
 import { useDropzone, DropzoneOptions } from 'react-dropzone';
-import { merge, noop } from 'lodash-es';
+import { merge, noop, omit } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { Upload as ChunkFileUpload } from 'chunk-file-upload';
 import {
@@ -21,17 +21,23 @@ import {
 import Container from './components/Container';
 import ViewFile from './components/ViewFile';
 import { DEFAULT_DROP_PROPS, LIFE_CYCLE_ENUM } from './constants';
-import { customAction, propsValueFormat, Emitter } from './utils';
+import {
+  propsValueFormat,
+  Emitter,
+  createPreview,
+  useControllableValue,
+  install,
+  getInstallMap,
+} from './utils';
 import {
   UploadProps,
   UploadInstance,
   WrapperFile,
   UploadContextType,
+  CustomAction,
 } from './type';
-import { useStateChange } from '@/utils';
 import './index.less';
 
-export { request } from '../utils/request';
 export * from './type';
 
 const emitter = new Emitter();
@@ -58,7 +64,12 @@ const { Provider } = UploadContext;
 
 const Upload = memo(
   forwardRef<UploadInstance, UploadProps>((props, ref) => {
-    const [files, setFiles] = useStateChange<WrapperFile[]>([]);
+    const [files, setFiles] = useControllableValue<WrapperFile[]>(
+      omit(props, ['defaultValue']),
+      {
+        defaultValue: propsValueFormat(props.defaultValue),
+      },
+    );
     const [uploadInstance, setUploadInstance] = useState<UploadInstanceType>();
 
     const {
@@ -108,8 +119,9 @@ const Upload = memo(
 
     const taskGenerate = useCallback(
       (file: File) => {
-        if (actionUrl) {
-          const { request, ...nextAction } = customAction({
+        const actionRequest = getInstallMap('request');
+        if (actionUrl && !!actionRequest) {
+          const { request, ...nextAction } = actionRequest({
             url: actionUrl,
             instance: uploadInstance!,
             withCredentials: !!withCredentials,
@@ -153,7 +165,7 @@ const Upload = memo(
                 local: {
                   type: 'local',
                   value: {
-                    preview: URL.createObjectURL(file),
+                    preview: createPreview(file),
                     fileId: id,
                     fileSize: file.size,
                     filename: file.name,
@@ -233,7 +245,7 @@ const Upload = memo(
           instance={uploadInstance!}
           style={viewStyle}
           className={viewClassName}
-          value={files}
+          value={files || []}
           viewType={viewType}
           showUploadList={showUploadList}
           onChange={onFilesChange}
@@ -282,22 +294,6 @@ const Upload = memo(
       setUploadInstance(instance);
     }, [lifecycle, uploadInstance]);
 
-    useEffect(() => {
-      const formatDefaultValue = propsValueFormat(defaultValue);
-      setFiles(formatDefaultValue);
-    }, []);
-
-    useEffect(() => {
-      if (value !== undefined) {
-        const formatValue = propsValueFormat(defaultValue);
-        setFiles(formatValue);
-      }
-    }, [value]);
-
-    useEffect(() => {
-      onChange?.(files);
-    }, [files]);
-
     return (
       <Provider value={contextValue}>
         <div
@@ -320,7 +316,7 @@ const Upload = memo(
             root={getRootProps<any>({})}
             input={getInputProps<any>({})}
             maxFiles={nextProps.maxFiles}
-            currentFiles={files.length}
+            currentFiles={files?.length || 0}
           />
           {!!showUploadList && fileDomList}
         </div>
@@ -329,4 +325,13 @@ const Upload = memo(
   }),
 );
 
-export default Upload;
+const WrapperUpload: typeof Upload & {
+  install: (
+    key: keyof CustomAction,
+    action: CustomAction[keyof CustomAction],
+  ) => void;
+} = Upload as any;
+
+WrapperUpload.install = install;
+
+export default WrapperUpload;

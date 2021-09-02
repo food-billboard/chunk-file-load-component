@@ -19,10 +19,6 @@ ul {
     flex-direction: column;
     justify-content: center;
     position: relative;
-    // &-icon {
-    //   margin-right: 14px;
-    //   font-size: 2em;
-    // }
     &-progress {
       position: relative;
       .chunk-upload-list-progress-status {
@@ -61,20 +57,13 @@ ul {
       align-items: center;
       justify-content: center;
       flex-wrap: wrap;
+      z-index: 1;
     }
     &:hover .chunk-upload-action-modal {
       visibility: visible;
       opacity: 1;
-      &-icon {
-        color: rgba(255, 255, 255, 0.8);
-        margin-right: 8px;
-        font-size: 1.2em;
-        &:hover {
-          color: white;
-        }
-      }
-      &-icon:nth-last-of-type(1) {
-        margin-right: 0;
+      .ant-btn.ant-btn-link[disabled] {
+        color: gray;
       }
     }
   }
