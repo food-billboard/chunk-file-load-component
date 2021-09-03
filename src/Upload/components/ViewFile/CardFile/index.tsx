@@ -17,7 +17,8 @@ const CardFile = memo((props: ViewDetailProps) => {
 
   const list = useMemo(() => {
     return value.map((item) => {
-      const node = (
+      const result = itemRender(props, item, value);
+      return (
         <ViewItem
           value={item}
           key={item.id}
@@ -27,11 +28,9 @@ const CardFile = memo((props: ViewDetailProps) => {
           onStop={onStop}
           iconRender={iconRender}
           viewType={viewType}
+          itemRender={result}
         />
       );
-      const result = itemRender(props, item, value);
-      if (result) return result(node);
-      return node;
     });
   }, [value]);
 

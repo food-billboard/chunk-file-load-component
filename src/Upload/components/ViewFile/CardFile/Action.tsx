@@ -4,7 +4,6 @@ import React, {
   useState,
   useCallback,
   useMemo,
-  ReactNode,
   useRef,
 } from 'react';
 import classnames from 'classnames';
@@ -13,7 +12,6 @@ import {
   UploadOutlined,
   DeleteOutlined,
   EyeOutlined,
-  LoadingOutlined,
 } from '@ant-design/icons';
 import { WrapperFile, UploadProps } from '@/Upload';
 import PreviewModal, { PreviewModalRef } from '../../Preview';

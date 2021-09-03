@@ -1,7 +1,9 @@
 import React, {
   forwardRef,
   memo,
+  ReactNode,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useRef,
   useState,
@@ -25,10 +27,23 @@ export interface PreviewProps {
 const PreviewModal = memo(
   forwardRef<PreviewModalRef, PreviewProps>((props, ref) => {
     const [visible, setVisible] = useState<boolean>(false);
+    const [customPreview, setCustomPreview] = useState<ReactNode | false>();
 
     const { value, previewFile, viewType } = props;
-    if (previewFile) return <>{previewFile(value, viewType)}</>;
     const preview = get(value, 'local.value.preview');
+
+    const fetchPreviewFile = useCallback(
+      async (
+        value: WrapperFile,
+        previewFile: UploadProps['previewFile'],
+        viewType: ViewType,
+      ) => {
+        let result: false | ReactNode = false;
+        if (previewFile) result = await previewFile?.(value, viewType);
+        setCustomPreview(result);
+      },
+      [],
+    );
 
     const open = useCallback(() => {
       setVisible(true);
@@ -43,6 +58,13 @@ const PreviewModal = memo(
       },
       [],
     );
+
+    useEffect(() => {
+      fetchPreviewFile(value, previewFile, viewType);
+    }, [value, viewType, previewFile]);
+
+    if (customPreview !== false && customPreview !== undefined)
+      return <>{customPreview}</>;
 
     return (
       <Modal

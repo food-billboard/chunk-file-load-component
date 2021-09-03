@@ -81,9 +81,10 @@ const Upload = memo(
       lifecycle = {},
       actionUrl,
       method,
+      headers,
       withCredentials = true,
       containerRender,
-      viewType = 'list',
+      viewType,
       viewStyle,
       viewClassName,
       defaultValue,
@@ -120,11 +121,13 @@ const Upload = memo(
     const taskGenerate = useCallback(
       (file: File) => {
         const actionRequest = getInstallMap('request');
-        if (actionUrl && !!actionRequest) {
+        if (actionUrl && !!actionRequest && !request) {
           const { request, ...nextAction } = actionRequest({
             url: actionUrl,
             instance: uploadInstance!,
             withCredentials: !!withCredentials,
+            headers,
+            method,
           });
           return {
             request: onError(request as TRequestType),
@@ -141,7 +144,7 @@ const Upload = memo(
           },
         };
       },
-      [request, actionUrl, withCredentials, onError],
+      [request, actionUrl, withCredentials, onError, headers, method],
     );
 
     const addTask = useCallback(
@@ -298,12 +301,14 @@ const Upload = memo(
       <Provider value={contextValue}>
         <div
           className={classnames('chunk-upload-container', {
-            ['chunk-upload-container-list']: viewType === 'list',
-            ['chunk-upload-container-card']: viewType === 'card',
+            ['chunk-upload-container-list']:
+              viewType === 'list' && !containerRender,
+            ['chunk-upload-container-card']:
+              viewType === 'card' && !containerRender,
           })}
         >
           <Container
-            viewType={viewType}
+            viewType={viewType || 'list'}
             isDragAccept={isDragAccept}
             isDragActive={isDragActive}
             isDragReject={isDragReject}

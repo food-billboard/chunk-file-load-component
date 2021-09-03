@@ -50,7 +50,12 @@ const Container = memo(
       params = merge({}, params, {
         isLimit,
       });
-      return <>{containerRender(params as any)}</>;
+      return (
+        <span {...nextProps.root}>
+          <input {...nextProps.input} />
+          {containerRender(params as any)}
+        </span>
+      );
     }
 
     if (isLimit) return <span></span>;

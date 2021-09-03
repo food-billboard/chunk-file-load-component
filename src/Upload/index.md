@@ -3,7 +3,7 @@
 基础:
 
 ```tsx
-import React, { useRef } from 'react';
+import React from 'react';
 import { Upload } from 'chunk-file-load-component';
 
 //mock local server
@@ -13,8 +13,6 @@ const sleep = (times = 500) =>
   new Promise((resolve) => setTimeout(resolve, times));
 
 export default () => {
-  const uploadRef = useRef();
-
   const exitDataFn = async (
     params: {
       filename: string;
@@ -61,7 +59,6 @@ export default () => {
   return (
     <>
       <Upload
-        ref={uploadRef}
         immediately={false}
         onRemove={sleep.bind(null, 1000)}
         viewType="list"
@@ -85,7 +82,7 @@ export default () => {
 错误:
 
 ```tsx
-import React, { useRef } from 'react';
+import React from 'react';
 import { Upload } from 'chunk-file-load-component';
 
 //mock local server
@@ -95,8 +92,6 @@ const sleep = (times = 500) =>
   new Promise((resolve) => setTimeout(resolve, times));
 
 export default () => {
-  const uploadRef = useRef();
-
   const exitDataFn = async (
     params: {
       filename: string;
@@ -153,9 +148,8 @@ export default () => {
   return (
     <>
       <Upload
-        ref={uploadRef}
         onRemove={sleep.bind(null, 1000)}
-        viewType="card"
+        viewType="list"
         immediately={false}
         request={{
           exitDataFn,
@@ -177,7 +171,7 @@ export default () => {
 上传受控:
 
 ```tsx
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Upload } from 'chunk-file-load-component';
 
 //mock local server
@@ -262,25 +256,326 @@ export default () => {
 };
 ```
 
-<!-- 生命周期:
-```tsx
-
-```
-
 自定义请求:
-```tsx
 
+- 可以使用[默认请求](https://github.com/food-billboard/chunk-upload-request)
+
+1. 此需要单独安装模块 `npm install chunk-upload-request`
+2. 使用
+
+```tsx | pure
+import request from 'chunk-upload-request';
+import { Upload } from 'chunk-file-load-component';
+
+Upload.install('request', request);
+
+const App = () => {
+  return <Upload />;
+};
 ```
+
+- 注册`request`插件后，组件则不需要传递`request`参数，如果传递，则使用`props`的`request`
+- 也可以自己实现自定义的`request`插件，参数及实现与[chunk-file-load](https://github.com/food-billboard/chunk-file-load)的`request`一致
+
+生命周期:
+
+```tsx | pure
+const App = () => {
+  return (
+    <Upload
+      lifecycle={{
+        beforeRead() {
+          console.log('beforeRead');
+        },
+      }}
+    />
+  );
+};
+```
+
+自定义上传容器:
+
+```tsx
+import React from 'react';
+import { Upload } from 'chunk-file-load-component';
+
+//mock local server
+let mockCache = {};
+
+const sleep = (times = 500) =>
+  new Promise((resolve) => setTimeout(resolve, times));
+
+export default () => {
+  const exitDataFn = async (
+    params: {
+      filename: string;
+      md5: string;
+      suffix: string;
+      size: number;
+      chunkSize: number;
+      chunksLength: number;
+    },
+    name: Symbol,
+  ) => {
+    await sleep();
+    console.log('exitDataFn', params);
+    mockCache[name] = {
+      max: params.chunksLength,
+      chunkSize: params.chunkSize,
+      size: params.size,
+      index: 0,
+    };
+    //Mock server response
+    return {
+      data: 0,
+    };
+  };
+
+  const uploadFn = async (data: FormData, name: Symbol) => {
+    await sleep();
+    console.log('uploadFn', data, name);
+    const size = mockCache[name].size;
+    mockCache[name].index++;
+    const nextOffset = mockCache[name].index * mockCache[name].chunkSize;
+    //Mock server response
+    return {
+      data: nextOffset >= size ? size : nextOffset,
+    };
+  };
+
+  const completeFn = async (data: any) => {
+    await sleep();
+    console.log('completeFn', data);
+    mockCache[data.name] = {};
+  };
+
+  const containerRender = ({
+    isDragAccept,
+    isDragActive,
+    isDragReject,
+    isFocused,
+    isFileDialogActive,
+    isLimit,
+    locale,
+  }) => {
+    return <button>点击上传</button>;
+  };
+
+  return (
+    <>
+      <Upload
+        containerRender={containerRender}
+        immediately={false}
+        onRemove={sleep.bind(null, 1000)}
+        viewType="list"
+        request={{
+          exitDataFn,
+          uploadFn,
+          completeFn,
+          callback(err, value) {
+            console.log(err, value);
+            if (!err) {
+              console.log('Upload Done!!');
+            }
+          },
+        }}
+      />
+    </>
+  );
+};
+```
+
+自定义上传列表
+
+```tsx
+import React from 'react';
+import { Upload } from 'chunk-file-load-component';
+
+//mock local server
+let mockCache = {};
+
+const sleep = (times = 500) =>
+  new Promise((resolve) => setTimeout(resolve, times));
+
+export default () => {
+  const exitDataFn = async (
+    params: {
+      filename: string;
+      md5: string;
+      suffix: string;
+      size: number;
+      chunkSize: number;
+      chunksLength: number;
+    },
+    name: Symbol,
+  ) => {
+    await sleep();
+    console.log('exitDataFn', params);
+    mockCache[name] = {
+      max: params.chunksLength,
+      chunkSize: params.chunkSize,
+      size: params.size,
+      index: 0,
+    };
+    //Mock server response
+    return {
+      data: 0,
+    };
+  };
+
+  const uploadFn = async (data: FormData, name: Symbol) => {
+    await sleep();
+    console.log('uploadFn', data, name);
+    const size = mockCache[name].size;
+    mockCache[name].index++;
+    const nextOffset = mockCache[name].index * mockCache[name].chunkSize;
+    //Mock server response
+    return {
+      data: nextOffset >= size ? size : nextOffset,
+    };
+  };
+
+  const completeFn = async (data: any) => {
+    await sleep();
+    console.log('completeFn', data);
+    mockCache[data.name] = {};
+  };
+
+  const itemRender = (
+    originNode,
+    file,
+    fileList,
+    { preview, upload, cancel, stop },
+    { complete, status, total },
+  ) => {
+    const fileName = file.task.file.name;
+    return (
+      <div>
+        {fileName}- 进度: {(complete / total) * 100 || 0}- 状态: {status}-<span
+          onClick={upload}
+        >
+          上传
+        </span>-<span onClick={cancel}>取消</span>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <Upload
+        itemRender={itemRender}
+        immediately={false}
+        onRemove={sleep.bind(null, 1000)}
+        viewType="list"
+        request={{
+          exitDataFn,
+          uploadFn,
+          completeFn,
+          callback(err, value) {
+            console.log(err, value);
+            if (!err) {
+              console.log('Upload Done!!');
+            }
+          },
+        }}
+      />
+    </>
+  );
+};
+```
+
+自定义预览
+
+```tsx
+import React from 'react';
+import { Upload } from 'chunk-file-load-component';
+
+//mock local server
+let mockCache = {};
+
+const sleep = (times = 500) =>
+  new Promise((resolve) => setTimeout(resolve, times));
+
+export default () => {
+  const exitDataFn = async (
+    params: {
+      filename: string;
+      md5: string;
+      suffix: string;
+      size: number;
+      chunkSize: number;
+      chunksLength: number;
+    },
+    name: Symbol,
+  ) => {
+    await sleep();
+    console.log('exitDataFn', params);
+    mockCache[name] = {
+      max: params.chunksLength,
+      chunkSize: params.chunkSize,
+      size: params.size,
+      index: 0,
+    };
+    //Mock server response
+    return {
+      data: 0,
+    };
+  };
+
+  const uploadFn = async (data: FormData, name: Symbol) => {
+    await sleep();
+    console.log('uploadFn', data, name);
+    const size = mockCache[name].size;
+    mockCache[name].index++;
+    const nextOffset = mockCache[name].index * mockCache[name].chunkSize;
+    //Mock server response
+    return {
+      data: nextOffset >= size ? size : nextOffset,
+    };
+  };
+
+  const completeFn = async (data: any) => {
+    await sleep();
+    console.log('completeFn', data);
+    mockCache[data.name] = {};
+  };
+
+  const previewFile = () => {
+    return <div>11111111111</div>;
+  };
+
+  return (
+    <>
+      <Upload
+        previewFile={previewFile}
+        immediately={false}
+        onRemove={sleep.bind(null, 1000)}
+        viewType="list"
+        request={{
+          exitDataFn,
+          uploadFn,
+          completeFn,
+          callback(err, value) {
+            console.log(err, value);
+            if (!err) {
+              console.log('Upload Done!!');
+            }
+          },
+        }}
+      />
+    </>
+  );
+};
+```
+
+<!--
 
 自定义上传验证:
 ```tsx
 
 ```
 
-自定义上传样式:
-```tsx
-
-``` -->
+ -->
 
 ### API
 
@@ -296,9 +591,9 @@ export default () => {
 | viewClassName   | 自定义文件列表类名                                                                                                                              | `string`                                                                                                                                                                                                                                                                                                                                          | -                                       |
 | viewType        | 上传列表的内建样式，支持两种基本样式 `list`, `card`                                                                                             | `list` &#124; `card`                                                                                                                                                                                                                                                                                                                              | `list`                                  |
 | iconRender      | 自定义显示 icon                                                                                                                                 | `(file: WrapperFile, viewType: ViewType) => ReactNode`                                                                                                                                                                                                                                                                                            | -                                       |
-| itemRender      | 自定义上传列表项                                                                                                                                | `(originNode: ReactElement, file: WrapperFile, fileList: WrapperFile[], actions: { preview: Function, upload: Function, cancel: Function, stop: Function }) => ReactNode`                                                                                                                                                                         | -                                       |
+| itemRender      | 自定义上传列表项                                                                                                                                | `(originNode: ReactElement, file: WrapperFile, fileList: WrapperFile[], actions: { preview: Function, upload: Function, cancel: Function, stop: Function }, progress: Partial<{ complete: number, total: number, status: any, current: number }>) => ReactNode`                                                                                   | -                                       |
 | showUploadList  | 是否展示文件列表, 可设为一个对象，用于单独设定 `showPreviewIcon`, `showRemoveIcon`, `showUploadIcon`, `removeIcon`, `previewIcon`, `uploadIcon` | `boolean \| { showPreviewIcon?: boolean, showRemoveIcon?: boolean, showUploadIcon?: boolean, removeIcon?: ReactNode \| (file: UploadFile) => ReactNode \| previewIcon?: ReactNode \| (file: UploadFile) => ReactNode \| uploadIcon?: ReactNode \| (file: UploadFile) => ReactNode \| uploadIcon?: ReactNode \| (file: UploadFile) => ReactNode }` | `true`                                  |
-| previewFile     | 自定义预览(默认情况仅支持图片)                                                                                                                  | `(file: WrapperFile, viewType: ViewType) => ReactNode`                                                                                                                                                                                                                                                                                            | -                                       |
+| previewFile     | 自定义预览(默认情况仅支持图片)，返回`false`表示使用默认预览                                                                                     | `(file: WrapperFile, viewType: ViewType) => Promise<ReactNode \| false>`                                                                                                                                                                                                                                                                          | -                                       |
 | containerRender | 自定义上传容器渲染                                                                                                                              | `(action: { isDragAccept: boolean, isDragActive: boolean, isDragReject: boolean, isFocused: boolean, isFileDialogActive: boolean, locale?: object, isLimit: boolean }) => ReactNode`                                                                                                                                                              | -                                       |
 | immediately     | 是否立即上传                                                                                                                                    | `boolean`                                                                                                                                                                                                                                                                                                                                         | `true`                                  |
 | directory       | 支持上传文件夹                                                                                                                                  | `boolean`                                                                                                                                                                                                                                                                                                                                         | `false`                                 |

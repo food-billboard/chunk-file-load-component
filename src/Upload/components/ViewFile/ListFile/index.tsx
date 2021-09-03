@@ -26,22 +26,26 @@ import {
   ViewDetailProps,
   actionIconPerformance,
 } from '../index';
-import { itemRender } from '@/Upload/utils';
+import { itemRender, useProgress } from '@/Upload/utils';
 import './index.less';
 export interface NormalViewItemProps {
   value: WrapperFile;
 }
 
+type ViewItemProps = {
+  value: WrapperFile;
+  onCancel: CancelMethod;
+  onUpload: UploadMethod;
+  onStop: StopMethod;
+} & Pick<
+  UploadProps,
+  'showUploadList' | 'iconRender' | 'previewFile' | 'viewType'
+>;
+
 const ViewItem = (
-  props: {
-    value: WrapperFile;
-    onCancel: CancelMethod;
-    onUpload: UploadMethod;
-    onStop: StopMethod;
-  } & Pick<
-    UploadProps,
-    'showUploadList' | 'iconRender' | 'previewFile' | 'viewType'
-  >,
+  props: ViewItemProps & {
+    itemRender: any;
+  },
 ) => {
   const [cancelLoading, setCancelLoading] = useState<boolean>(false);
   const [isDealing, setIsDealing] = useState<boolean>(false);
@@ -59,8 +63,11 @@ const ViewItem = (
     iconRender,
     previewFile,
     showUploadList,
+    itemRender,
   } = props;
-  const { task, local, id, error } = value;
+  const { task, local, id, error, name } = value;
+  const progressInfo = useProgress(name);
+  const [complete, total, current] = progressInfo;
 
   const handleStop = useCallback(() => {
     onStop(value);
@@ -157,7 +164,7 @@ const ViewItem = (
     setIsComplete(value.local?.type === 'url');
   }, [value]);
 
-  return (
+  const node = (
     <li className={'chunk-upload-list-item'}>
       <Icon
         className={'chunk-upload-list-item-icon'}
@@ -170,7 +177,11 @@ const ViewItem = (
           'chunk-upload-list-item-info-error': !!error,
         })}
       >
-        <Progress file={value} onChange={onProgressChange} />
+        <Progress
+          file={value}
+          onChange={onProgressChange}
+          progress={progressInfo}
+        />
         <span>{local?.value?.filename || local?.value?.fileId || id}</span>
       </div>
       {actionRender}
@@ -182,6 +193,16 @@ const ViewItem = (
       />
     </li>
   );
+
+  if (itemRender)
+    return itemRender(node, {
+      current,
+      total,
+      complete,
+      status: task?.status,
+    });
+
+  return node;
 };
 
 const ListFile = memo((props: ViewDetailProps) => {
@@ -199,7 +220,8 @@ const ListFile = memo((props: ViewDetailProps) => {
 
   const list = useMemo(() => {
     return value.map((item) => {
-      const node = (
+      const result = itemRender(props, item, value);
+      return (
         <ViewItem
           value={item}
           key={item.id}
@@ -209,11 +231,9 @@ const ListFile = memo((props: ViewDetailProps) => {
           onStop={onStop}
           iconRender={iconRender}
           viewType={viewType}
+          itemRender={result}
         />
       );
-      const result = itemRender(props, item, value);
-      if (result) return result(node);
-      return node;
     });
   }, [value]);
 

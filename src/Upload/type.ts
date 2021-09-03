@@ -65,8 +65,17 @@ export interface UploadProps
       cancel: Function;
       stop: Function;
     },
+    progress: Partial<{
+      current: number;
+      total: number;
+      complete: number;
+      status: ECACHE_STATUS;
+    }>,
   ) => ReactNode;
-  previewFile?: (file: WrapperFile, viewType: ViewType) => ReactNode;
+  previewFile?: (
+    file: WrapperFile,
+    viewType: ViewType,
+  ) => Promise<ReactNode | false>;
   showUploadList?:
     | boolean
     | {

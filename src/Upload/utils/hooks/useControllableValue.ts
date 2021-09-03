@@ -13,26 +13,26 @@ function useControllableValue<T = any>(
   options: Options<T>,
 ): StateChangeReturnType<T> {
   const [value, setValue] = aUserControlLabelValue<T>(props, options);
-  const callbackRef = useRef<any>();
+  // const callbackRef = useRef<any>();
 
-  const realSetValue = useCallback(
-    (newValue: T | ((prev: T) => T), callback?: (value: T) => void) => {
-      callbackRef.current = callback;
-      const result =
-        typeof newValue === 'function'
-          ? (newValue as (prev: T) => T)(value)
-          : newValue;
-      setValue(result);
-    },
-    [value],
-  );
+  // const realSetValue = useCallback(
+  //   (newValue: T | ((prev: T) => T), callback?: (value: T) => void) => {
+  //     callbackRef.current = callback;
+  //     const result =
+  //       typeof newValue === 'function'
+  //         ? (newValue as (prev: T) => T)(value)
+  //         : newValue;
+  //     setValue(result);
+  //   },
+  //   [value],
+  // );
 
-  useEffect(() => {
-    const newValue = propsValueFormat(value);
-    callbackRef.current?.(newValue);
-  }, [value]);
+  // useEffect(() => {
+  //   const newValue = propsValueFormat(value);
+  //   callbackRef.current?.(newValue);
+  // }, [value]);
 
-  return [value, realSetValue];
+  return [value, setValue as any];
 }
 
 export default useControllableValue;

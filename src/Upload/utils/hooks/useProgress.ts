@@ -38,7 +38,9 @@ export const getProcessStatusLocale: (
 
 export type ProgressType = TWrapperTask['process'] & { step: ECACHE_STATUS };
 
-function useProgress(name: Symbol): [number, number, number, ProgressType] {
+function useProgress(
+  name: Symbol,
+): [number, number, number, number, ProgressType] {
   const { emitter, instance } = useContext(UploadContext);
 
   const [progress, setProgress] = useState<ProgressType>({
@@ -63,11 +65,11 @@ function useProgress(name: Symbol): [number, number, number, ProgressType] {
     emitter.on(name, action.bind(null, instance));
   }, [emitter, instance]);
 
-  let { complete, total } = progress;
+  let { complete, total, current } = progress;
   complete ||= 0;
   total ||= 0;
 
-  return [complete, total, (complete / total) * 100 || 0, progress];
+  return [complete, total, current, (complete / total) * 100 || 0, progress];
 }
 
 export default useProgress;

@@ -13,12 +13,21 @@ const Progress = memo(
       file: WrapperFile;
       onChange?: (progress: ProgressType) => void;
       fixed?: number;
+      progress: ReturnType<typeof useProgress>;
     },
   ) => {
-    const { file, className, style, onChange, fixed = 0, ...nextProps } = props;
-    const { name, error } = file;
+    const {
+      file,
+      className,
+      style,
+      onChange,
+      fixed = 0,
+      progress: progressInfo,
+      ...nextProps
+    } = props;
+    const { error } = file;
 
-    const [, , progress, origin] = useProgress(name);
+    const [, , , progress, origin] = progressInfo;
     const status = useStatus(file.task?.status ?? 1);
 
     const percent = useMemo(() => {

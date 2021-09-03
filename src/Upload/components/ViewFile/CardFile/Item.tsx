@@ -10,6 +10,7 @@ import ActionModal from './Action';
 import { UploadContext, WrapperFile, UploadProps } from '@/Upload';
 import Icon from '../IconRender';
 import { CancelMethod, UploadMethod, StopMethod } from '../index';
+import { useProgress } from '@/Upload/utils';
 import './index.less';
 
 const ViewItem = memo(
@@ -19,6 +20,7 @@ const ViewItem = memo(
       onCancel: CancelMethod;
       onUpload: UploadMethod;
       onStop: StopMethod;
+      itemRender: any;
     } & Pick<
       UploadProps,
       'showUploadList' | 'iconRender' | 'viewType' | 'previewFile'
@@ -38,8 +40,11 @@ const ViewItem = memo(
       previewFile,
       iconRender,
       showUploadList,
+      itemRender,
     } = props;
-    const { task, local, id } = value;
+    const { task, local, id, name } = value;
+    const progressInfo = useProgress(name);
+    const [complete, total, current] = progressInfo;
 
     const handleStop = useCallback(() => {
       onStop(value);
@@ -60,7 +65,7 @@ const ViewItem = memo(
       setIsComplete(value.local?.type === 'url');
     }, [value]);
 
-    return (
+    const node = (
       <div className={'chunk-upload-card-item'}>
         <Icon
           className={'chunk-upload-card-item-icon'}
@@ -76,6 +81,7 @@ const ViewItem = memo(
             style={{ flexDirection: 'column', width: '100%' }}
             showInfo={false}
             strokeWidth={5}
+            progress={progressInfo}
           />
         )}
         <div className="chunk-upload-card-item-info">
@@ -94,6 +100,15 @@ const ViewItem = memo(
         />
       </div>
     );
+
+    if (itemRender)
+      return itemRender(node, {
+        complete,
+        current,
+        total,
+        status: task?.status,
+      });
+    return node;
   },
 );
 
