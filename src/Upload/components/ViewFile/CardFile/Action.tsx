@@ -20,19 +20,21 @@ import { className } from '@/utils';
 import { Button } from 'antd';
 
 const ActionModal = memo(
-  (props: {
-    style?: CSSProperties;
-    className?: string;
-    onStop: () => void;
-    onCancel: CancelMethod;
-    onUpload: () => void;
-    isDealing: boolean;
-    isComplete: boolean;
-    value: WrapperFile;
-    previewFile: UploadProps['previewFile'];
-    showUploadList: UploadProps['showUploadList'];
-    viewType: UploadProps['viewType'];
-  }) => {
+  (
+    props: {
+      style?: CSSProperties;
+      className?: string;
+      onStop: () => void;
+      onCancel: CancelMethod;
+      onUpload: () => void;
+      isDealing: boolean;
+      isComplete: boolean;
+      value: WrapperFile;
+    } & Pick<
+      UploadProps,
+      'previewFile' | 'showUploadList' | 'viewType' | 'onPreviewFile'
+    >,
+  ) => {
     const {
       showUploadList,
       onStop,
@@ -45,6 +47,7 @@ const ActionModal = memo(
       value,
       previewFile,
       viewType = 'list',
+      onPreviewFile,
     } = props;
     const { error } = value;
 
@@ -117,7 +120,7 @@ const ActionModal = memo(
               icon={previewIconNode || <EyeOutlined />}
               loading={cancelLoading}
               type="link"
-              disabled={!value.local?.value?.preview}
+              disabled={!value.local?.value?.preview && !previewFile}
             />
           )}
         </>
@@ -131,6 +134,7 @@ const ActionModal = memo(
       onPreview,
       uploadButtonAction,
       showUploadList,
+      previewFile,
     ]);
 
     return (
@@ -141,6 +145,7 @@ const ActionModal = memo(
           value={value}
           previewFile={previewFile}
           viewType={viewType}
+          onPreviewFile={onPreviewFile}
         />
       </div>
     );

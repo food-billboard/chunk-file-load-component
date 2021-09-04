@@ -95,6 +95,10 @@ const Upload = memo(
       iconRender,
       itemRender,
       previewFile,
+      onValidator,
+      validator: propsValidator,
+      onPreviewFile,
+      multiple = false,
       ...nextProps
     } = props;
 
@@ -198,13 +202,20 @@ const Upload = memo(
     const onDrop: DropzoneOptions['onDrop'] = useCallback(
       (acceptedFiles, fileRejections) => {
         const { wrapperFiles, errorFiles } = addTask(acceptedFiles);
-        if (!!errorFiles.length) console.error('some file error');
+        onValidator?.(
+          [...errorFiles, ...fileRejections],
+          wrapperFiles.map((item) => item.originFile!),
+        );
         setFiles((prev) => {
           return [...prev, ...wrapperFiles];
         });
       },
-      [addTask],
+      [addTask, onValidator],
     );
+
+    const validator = useMemo(() => {
+      return propsValidator || getInstallMap('validator');
+    }, [propsValidator]);
 
     const {
       getRootProps,
@@ -217,6 +228,8 @@ const Upload = memo(
     } = useDropzone(
       merge({}, DEFAULT_DROP_PROPS, {
         onDrop,
+        validator,
+        multiple,
         ...nextProps,
       }),
     );
@@ -238,10 +251,6 @@ const Upload = memo(
       [getTask],
     );
 
-    const onFilesChange = useCallback((files: WrapperFile[]) => {
-      setFiles(files);
-    }, []);
-
     const fileDomList = useMemo(() => {
       return (
         <ViewFile
@@ -251,11 +260,12 @@ const Upload = memo(
           value={files || []}
           viewType={viewType}
           showUploadList={showUploadList}
-          onChange={onFilesChange}
+          onChange={setFiles}
           onRemove={onRemove}
           iconRender={iconRender}
           itemRender={itemRender}
           previewFile={previewFile}
+          onPreviewFile={onPreviewFile}
         />
       );
     }, [
@@ -267,6 +277,9 @@ const Upload = memo(
       viewStyle,
       onRemove,
       itemRender,
+      previewFile,
+      iconRender,
+      onPreviewFile,
     ]);
 
     const contextValue = useMemo(() => {

@@ -43,18 +43,18 @@ export const actionIconPerformance = (
       uploadIcon,
       stopIcon,
     } = showUploadList;
-    previewShow = !!showPreviewIcon;
+    previewShow = !!showPreviewIcon || !!previewIcon;
     previewIconNode =
       !!previewShow &&
       (typeof previewIcon === 'function' ? previewIcon(value) : previewIcon);
-    uploadShow = !!showUploadIcon;
+    uploadShow = !!showUploadIcon || !!uploadIcon;
     uploadIconNode =
       !!uploadShow &&
       (typeof uploadIcon === 'function' ? uploadIcon(value) : uploadIcon);
     stopIconNode =
       !!uploadShow &&
       (typeof stopIcon === 'function' ? stopIcon(value) : stopIcon);
-    deleteShow = !!showRemoveIcon;
+    deleteShow = !!showRemoveIcon || !!removeIcon;
     deleteIconNode =
       !!deleteShow &&
       (typeof removeIcon === 'function' ? removeIcon(value) : removeIcon);

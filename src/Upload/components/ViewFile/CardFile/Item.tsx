@@ -23,7 +23,11 @@ const ViewItem = memo(
       itemRender: any;
     } & Pick<
       UploadProps,
-      'showUploadList' | 'iconRender' | 'viewType' | 'previewFile'
+      | 'showUploadList'
+      | 'iconRender'
+      | 'viewType'
+      | 'previewFile'
+      | 'onPreviewFile'
     >,
   ) => {
     const [isDealing, setIsDealing] = useState<boolean>(false);
@@ -41,6 +45,7 @@ const ViewItem = memo(
       iconRender,
       showUploadList,
       itemRender,
+      onPreviewFile,
     } = props;
     const { task, local, id, name } = value;
     const progressInfo = useProgress(name);
@@ -67,12 +72,7 @@ const ViewItem = memo(
 
     const node = (
       <div className={'chunk-upload-card-item'}>
-        <Icon
-          className={'chunk-upload-card-item-icon'}
-          iconRender={iconRender}
-          file={value}
-          viewType={viewType!}
-        />
+        <Icon iconRender={iconRender} file={value} viewType={viewType!} />
         {!isComplete && (
           <Progress
             file={value}
@@ -97,6 +97,7 @@ const ViewItem = memo(
           previewFile={previewFile}
           showUploadList={showUploadList}
           viewType={viewType}
+          onPreviewFile={onPreviewFile}
         />
       </div>
     );

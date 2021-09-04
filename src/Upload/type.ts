@@ -47,6 +47,7 @@ export interface UploadProps
   value?: UploadProps['defaultValue'];
   onChange?: (value: WrapperFile[]) => void;
   onRemove?: (task: WrapperFile) => boolean | Promise<boolean>;
+  onValidator?: (errorFile: File[], fulfilledFile: File[]) => void;
 
   style?: CSSProperties;
   className?: string;
@@ -54,7 +55,11 @@ export interface UploadProps
   viewStyle?: CSSProperties;
   viewClassName?: string;
   viewType?: ViewType;
-  iconRender?: (file: WrapperFile, viewType: ViewType) => ReactNode;
+  iconRender?: (
+    file: WrapperFile,
+    viewType: ViewType,
+    originNode: ReactNode,
+  ) => ReactNode;
   itemRender?: (
     originNode: ReactElement,
     file: WrapperFile,
@@ -76,6 +81,7 @@ export interface UploadProps
     file: WrapperFile,
     viewType: ViewType,
   ) => Promise<ReactNode | false>;
+  onPreviewFile?: (file: WrapperFile) => Promise<boolean>;
   showUploadList?:
     | boolean
     | {
@@ -98,8 +104,6 @@ export interface UploadProps
   }) => ReactNode;
 
   immediately?: boolean;
-
-  directory?: boolean;
 
   actionUrl?: string;
   method?: [string | false, string, string | false];
@@ -135,6 +139,7 @@ export interface ViewFileProps
     | 'itemRender'
     | 'onRemove'
     | 'previewFile'
+    | 'onPreviewFile'
   > {
   instance: Upload;
   value: WrapperFile[];
@@ -156,4 +161,5 @@ export type CustomActionRequest = () => {};
 
 export type CustomAction = {
   request: CustomActionRequest;
+  validator: DropzoneOptions['validator'];
 };

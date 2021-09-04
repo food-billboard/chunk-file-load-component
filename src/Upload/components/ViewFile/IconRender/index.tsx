@@ -21,10 +21,6 @@ export interface IconProps extends Pick<UploadProps, 'iconRender'> {
 const Icon = memo((props: IconProps) => {
   const { iconRender, file, viewType, className, style } = props;
 
-  if (iconRender) {
-    return <>{iconRender(file, viewType)}</>;
-  }
-
   const fileType: any = useMemo(() => {
     const type = file.task?.tool.file.getFileType(file.task);
     return listFormatType(type);
@@ -66,6 +62,10 @@ const Icon = memo((props: IconProps) => {
       />
     );
   }, [fileType, IconMap, DEFAULT_ICON]);
+
+  if (iconRender) {
+    return <>{iconRender(file, viewType, icon)}</>;
+  }
 
   return icon;
 });

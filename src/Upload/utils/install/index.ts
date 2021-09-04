@@ -15,4 +15,5 @@ const INSTALL_MAP: {
   [key: string]: any;
 } = {
   request: undefined,
+  validator: undefined,
 };

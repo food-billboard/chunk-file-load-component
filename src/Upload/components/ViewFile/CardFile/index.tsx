@@ -13,6 +13,7 @@ const CardFile = memo((props: ViewDetailProps) => {
     onStop,
     iconRender,
     viewType,
+    onPreviewFile,
   } = props;
 
   const list = useMemo(() => {
@@ -29,10 +30,20 @@ const CardFile = memo((props: ViewDetailProps) => {
           iconRender={iconRender}
           viewType={viewType}
           itemRender={result}
+          onPreviewFile={onPreviewFile}
         />
       );
     });
-  }, [value]);
+  }, [
+    value,
+    showUploadList,
+    onCancel,
+    onUpload,
+    onStop,
+    iconRender,
+    viewType,
+    onPreviewFile,
+  ]);
 
   return <>{list}</>;
 });

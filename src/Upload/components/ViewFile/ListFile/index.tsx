@@ -39,7 +39,7 @@ type ViewItemProps = {
   onStop: StopMethod;
 } & Pick<
   UploadProps,
-  'showUploadList' | 'iconRender' | 'previewFile' | 'viewType'
+  'showUploadList' | 'iconRender' | 'previewFile' | 'viewType' | 'onPreviewFile'
 >;
 
 const ViewItem = (
@@ -64,6 +64,7 @@ const ViewItem = (
     previewFile,
     showUploadList,
     itemRender,
+    onPreviewFile,
   } = props;
   const { task, local, id, error, name } = value;
   const progressInfo = useProgress(name);
@@ -143,7 +144,7 @@ const ViewItem = (
             danger={!!error}
             onClick={onPreview}
             icon={previewIconNode || <EyeOutlined />}
-            disabled={!value.local?.value?.preview}
+            disabled={!value.local?.value?.preview && !previewFile}
           />
         )}
       </>
@@ -158,6 +159,7 @@ const ViewItem = (
     uploadButtonAction,
     showUploadList,
     isDealing,
+    previewFile,
   ]);
 
   useEffect(() => {
@@ -190,6 +192,7 @@ const ViewItem = (
         value={value}
         previewFile={previewFile}
         viewType={viewType}
+        onPreviewFile={onPreviewFile}
       />
     </li>
   );
@@ -216,6 +219,8 @@ const ListFile = memo((props: ViewDetailProps) => {
     viewType,
     style,
     className,
+    previewFile,
+    onPreviewFile,
   } = props;
 
   const list = useMemo(() => {
@@ -232,10 +237,22 @@ const ListFile = memo((props: ViewDetailProps) => {
           iconRender={iconRender}
           viewType={viewType}
           itemRender={result}
+          previewFile={previewFile}
+          onPreviewFile={onPreviewFile}
         />
       );
     });
-  }, [value]);
+  }, [
+    value,
+    previewFile,
+    viewType,
+    iconRender,
+    onStop,
+    onUpload,
+    onCancel,
+    showUploadList,
+    onPreviewFile,
+  ]);
 
   return (
     <aside style={style} className={className}>

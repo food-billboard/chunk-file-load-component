@@ -5,23 +5,22 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
-  useRef,
   useState,
 } from 'react';
-import { Modal, Empty } from 'antd';
+import { Modal } from 'antd';
 import { get } from 'lodash-es';
 import { WrapperFile, UploadProps, ViewType } from '@/Upload';
-import { IMAGE_FALLBACK } from '@/utils';
+import { IMAGE_FALLBACK, withTry } from '@/utils';
 import './index.less';
 
 export interface PreviewModalRef {
   open: () => void;
 }
 
-export interface PreviewProps {
+export interface PreviewProps
+  extends Pick<UploadProps, 'onPreviewFile' | 'previewFile'> {
   value: WrapperFile;
   viewType: ViewType;
-  previewFile: UploadProps['previewFile'];
 }
 
 const PreviewModal = memo(
@@ -29,7 +28,7 @@ const PreviewModal = memo(
     const [visible, setVisible] = useState<boolean>(false);
     const [customPreview, setCustomPreview] = useState<ReactNode | false>();
 
-    const { value, previewFile, viewType } = props;
+    const { value, previewFile, viewType, onPreviewFile } = props;
     const preview = get(value, 'local.value.preview');
 
     const fetchPreviewFile = useCallback(
@@ -45,9 +44,14 @@ const PreviewModal = memo(
       [],
     );
 
-    const open = useCallback(() => {
-      setVisible(true);
-    }, []);
+    const open = useCallback(async () => {
+      const [, result] = onPreviewFile
+        ? await withTry(onPreviewFile)(value)
+        : [, true];
+      if (result) {
+        setVisible(true);
+      }
+    }, [onPreviewFile, value]);
 
     useImperativeHandle(
       ref,
@@ -60,11 +64,12 @@ const PreviewModal = memo(
     );
 
     useEffect(() => {
-      fetchPreviewFile(value, previewFile, viewType);
-    }, [value, viewType, previewFile]);
+      if (visible) fetchPreviewFile(value, previewFile, viewType);
+    }, [value, viewType, previewFile, visible]);
 
-    if (customPreview !== false && customPreview !== undefined)
+    if (customPreview !== false && customPreview !== undefined && visible) {
       return <>{customPreview}</>;
+    }
 
     return (
       <Modal
