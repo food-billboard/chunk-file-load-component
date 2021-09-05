@@ -1,0 +1,17 @@
+.chunk-upload-list-progress {
+  display: flex;
+  align-items: center;
+  line-height: 2em;
+  &-status {
+    white-space: nowrap;
+    text-indent: 1em;
+    width: 8em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+.chunk-upload-list-progress {
+  &.chunk-upload-list-progress-error > &-status {
+    color: red;
+  }
+}
