@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { merge } from 'lodash-es';
-import { TWrapperTask, Upload, ECACHE_STATUS } from 'chunk-file-upload/src';
+import { TWrapperTask, Upload, ECACHE_STATUS } from 'chunk-file-upload';
 import { UploadContext, UploadProps } from '@/Upload';
 
 const STATUS_MAP = {

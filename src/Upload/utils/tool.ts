@@ -1,4 +1,4 @@
-import { TWrapperTask } from 'chunk-file-upload/src';
+import { TWrapperTask } from 'chunk-file-upload';
 import { merge } from 'lodash-es';
 import { nanoid } from 'nanoid';
 import { UploadProps, WrapperFile, PartialWrapperFile } from '../type';

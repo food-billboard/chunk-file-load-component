@@ -1,5 +1,5 @@
 import { ReactNode, useContext, useEffect, useState } from 'react';
-import { ECACHE_STATUS } from 'chunk-file-upload/src';
+import { ECACHE_STATUS } from 'chunk-file-upload';
 import { UploadContext } from '@/Upload';
 import { getProcessStatusLocale } from '@/Upload/utils/hooks/useProgress';
 

@@ -12,6 +12,7 @@
 /docs-dist
 /lib
 /lib/*
+/es/*
 
 /.history
 

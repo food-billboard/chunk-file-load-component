@@ -12,12 +12,11 @@ import classnames from 'classnames';
 import { useDropzone, DropzoneOptions } from 'react-dropzone';
 import { merge, noop, omit } from 'lodash-es';
 import { nanoid } from 'nanoid';
-import { Upload as ChunkFileUpload } from 'chunk-file-upload';
 import {
-  Upload as UploadInstanceType,
+  Upload as ChunkFileUpload,
   TRequestType,
   TLifecycle,
-} from 'chunk-file-upload/src';
+} from 'chunk-file-upload';
 import Container from './components/Container';
 import ViewFile from './components/ViewFile';
 import { DEFAULT_DROP_PROPS, LIFE_CYCLE_ENUM } from './constants';
@@ -70,7 +69,7 @@ const Upload = memo(
         defaultValue: propsValueFormat(props.defaultValue),
       },
     );
-    const [uploadInstance, setUploadInstance] = useState<UploadInstanceType>();
+    const [uploadInstance, setUploadInstance] = useState<ChunkFileUpload>();
 
     const {
       className,

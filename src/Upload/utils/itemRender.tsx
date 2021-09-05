@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { ECACHE_STATUS } from 'chunk-file-upload/src';
+import { ECACHE_STATUS } from 'chunk-file-upload';
 import { ViewDetailProps } from '../components/ViewFile';
 import { WrapperFile } from '../type';
 

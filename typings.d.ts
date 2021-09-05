@@ -1,3 +1,3 @@
 declare module '*.css';
 declare module '*.less';
-declare module 'chunk-file-upload'
+// declare module 'chunk-file-upload'

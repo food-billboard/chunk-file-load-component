@@ -18,5 +18,7 @@ export default defineConfig({
   ],
   history: { type: 'hash' },
   publicPath: './',
+  dynamicImport: {},
+  exportStatic: {},
   // more config: https://d.umijs.org/config
 });

@@ -1,11 +1,6 @@
 import { CSSProperties, ReactNode, ReactElement } from 'react';
 import { DropzoneOptions } from 'react-dropzone';
-import {
-  TWrapperTask,
-  Ttask,
-  Upload,
-  ECACHE_STATUS,
-} from 'chunk-file-upload/src';
+import { TWrapperTask, Ttask, Upload, ECACHE_STATUS } from 'chunk-file-upload';
 import { Emitter } from './utils';
 
 export type WrapperFile = {
