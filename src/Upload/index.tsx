@@ -83,7 +83,7 @@ const Upload = memo(
       headers,
       withCredentials = true,
       containerRender,
-      viewType,
+      viewType = 'list',
       viewStyle,
       viewClassName,
       defaultValue,

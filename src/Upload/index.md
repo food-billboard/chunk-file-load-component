@@ -280,14 +280,26 @@ export default () => {
 2. 使用
 
 ```tsx | pure
+import React from 'react';
 import request from 'chunk-upload-request';
 import { Upload } from 'chunk-file-load-component';
 
-Upload.install('request', request);
+Upload.install('request', request());
 
 const App = () => {
-  return <Upload />;
+  return (
+    <Upload
+      immediately={false}
+      actionUrl={['/api/check', '/api/load', '/api/complete']}
+      lifecycle={{
+        afterComplete() {
+          console.log('upload complete');
+        },
+      }}
+    />
+  );
 };
+export default App;
 ```
 
 - 注册`request`插件后，组件则不需要传递`request`参数，如果传递，则使用`props`的`request`
@@ -1198,7 +1210,7 @@ export default () => {
 | onPreviewFile   | 当文件预览时，返回`boolean`控制是否预览                                                                                                         | `(file: WrapperFile) => Promise<boolean>`                                                                                                                                                                                                                                                                                                         | -                                       |
 | containerRender | 自定义上传容器渲染                                                                                                                              | `(action: { isDragAccept: boolean, isDragActive: boolean, isDragReject: boolean, isFocused: boolean, isFileDialogActive: boolean, locale?: object, isLimit: boolean }) => ReactNode`                                                                                                                                                              | -                                       |
 | immediately     | 是否立即上传                                                                                                                                    | `boolean`                                                                                                                                                                                                                                                                                                                                         | `true`                                  |
-| actionUrl       | 上传地址                                                                                                                                        | `string`                                                                                                                                                                                                                                                                                                                                          | -                                       |
+| actionUrl       | 上传地址                                                                                                                                        | `string\|[string, string, string?]`                                                                                                                                                                                                                                                                                                               | -                                       |
 | method          | 请求方法，分为三阶段(上传前预查，上传，上传完成)                                                                                                | `[string \| false, string, string \| false]`                                                                                                                                                                                                                                                                                                      | `["get", "post", "post]`                |
 | headers         | 请求的额外请求头，分为三阶段(上传前预查，上传，上传完成)                                                                                        | `[object \| false, object \| false, object \| false]`                                                                                                                                                                                                                                                                                             | -                                       |
 | withCredentials | 上传请求时是否携带 `cookie`                                                                                                                     | `boolean`                                                                                                                                                                                                                                                                                                                                         | `false`                                 |

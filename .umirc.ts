@@ -20,5 +20,11 @@ export default defineConfig({
   publicPath: './',
   dynamicImport: {},
   exportStatic: {},
+  proxy: {
+    '/api': {
+      target: 'http://localhost:4000/',
+      changeOrigin: true,
+    },
+  },
   // more config: https://d.umijs.org/config
 });

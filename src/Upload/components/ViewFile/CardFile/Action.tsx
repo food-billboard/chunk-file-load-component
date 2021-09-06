@@ -70,7 +70,7 @@ const ActionModal = memo(
     const uploadButtonAction = useCallback(
       (uploadIcon: any, stopIcon: any) => {
         if (isComplete) return null;
-        if (isDealing) {
+        if (isDealing && !error) {
           return (
             <Button
               onClick={onStop}
@@ -89,7 +89,7 @@ const ActionModal = memo(
           />
         );
       },
-      [isDealing, onUpload, onStop, isComplete, cancelLoading],
+      [isDealing, onUpload, onStop, isComplete, cancelLoading, error],
     );
 
     const actionRender = useMemo(() => {

@@ -86,12 +86,12 @@ const ViewItem = (
 
   const uploadButtonAction = useCallback(
     (uploadIcon: any, stopIcon: any) => {
-      if (isDealing) {
+      if (isDealing && !error) {
         return stopIcon || <PauseCircleOutlined />;
       }
       return uploadIcon || <UploadOutlined />;
     },
-    [isDealing],
+    [isDealing, error],
   );
 
   const onProgressChange = useCallback(() => {
@@ -124,7 +124,7 @@ const ViewItem = (
             style={{ visibility: isComplete ? 'hidden' : 'visible' }}
             loading={cancelLoading}
             type="link"
-            onClick={isDealing ? handleStop : handleUpload}
+            onClick={isDealing && !error ? handleStop : handleUpload}
             icon={uploadButtonAction(uploadIconNode, stopIconNode)}
           />
         )}

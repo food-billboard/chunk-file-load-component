@@ -1,6 +1,12 @@
 import { CSSProperties, ReactNode, ReactElement } from 'react';
 import { DropzoneOptions } from 'react-dropzone';
-import { TWrapperTask, Ttask, Upload, ECACHE_STATUS } from 'chunk-file-upload';
+import {
+  TWrapperTask,
+  Ttask,
+  Upload,
+  ECACHE_STATUS,
+  TRequestType,
+} from 'chunk-file-upload';
 import { Emitter } from './utils';
 
 export type WrapperFile = {
@@ -100,7 +106,7 @@ export interface UploadProps
 
   immediately?: boolean;
 
-  actionUrl?: string;
+  actionUrl?: string | [string, string, string?];
   method?: [string | false, string, string | false];
   headers?: [object | false, object | false, object | false];
   withCredentials?: boolean;
@@ -152,7 +158,16 @@ export interface UploadContextType {
 
 export type FileTaskProgress = Map<Symbol, Required<TWrapperTask['process']>>;
 
-export type CustomActionRequest = () => {};
+export type CustomActionRequest = (params: {
+  url: string | [string, string, string | undefined];
+  instance: Upload;
+  method?: [string | false, string, string | false];
+  headers?: [object | false, object | false, object | false];
+  withCredentials?: boolean;
+}) => {
+  request: TRequestType;
+  [key: string]: any;
+};
 
 export type CustomAction = {
   request: CustomActionRequest;
