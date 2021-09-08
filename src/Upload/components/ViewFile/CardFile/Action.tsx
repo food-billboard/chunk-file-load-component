@@ -13,10 +13,10 @@ import {
   DeleteOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
-import { WrapperFile, UploadProps } from '@/Upload';
+import { WrapperFile, UploadProps } from '../../../index';
 import PreviewModal, { PreviewModalRef } from '../../Preview';
 import { CancelMethod, actionIconPerformance } from '../index';
-import { className } from '@/utils';
+import { className } from '../../../../utils';
 import { Button } from 'antd';
 
 const ActionModal = memo(

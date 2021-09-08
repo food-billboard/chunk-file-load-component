@@ -18,7 +18,7 @@ import { Button } from 'antd';
 import Icon from '../IconRender';
 import Progress from '../Progress';
 import PreviewModal, { PreviewModalRef } from '../../Preview';
-import { UploadContext, WrapperFile, UploadProps } from '@/Upload';
+import { UploadContext, WrapperFile, UploadProps } from '../../../index';
 import {
   CancelMethod,
   UploadMethod,
@@ -26,7 +26,7 @@ import {
   ViewDetailProps,
   actionIconPerformance,
 } from '../index';
-import { itemRender, useProgress } from '@/Upload/utils';
+import { itemRender, useProgress } from '../../../utils';
 import './index.less';
 export interface NormalViewItemProps {
   value: WrapperFile;

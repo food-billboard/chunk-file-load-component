@@ -1,7 +1,7 @@
 import React, { memo, CSSProperties, useMemo } from 'react';
 import { DropzoneState } from 'react-dropzone';
 import { pick, merge } from 'lodash-es';
-import { UploadProps, ViewType } from '@/Upload';
+import { UploadProps, ViewType } from '../../index';
 import ListFile from './ListFile';
 import CardFile from './CardFile';
 

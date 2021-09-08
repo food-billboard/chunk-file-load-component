@@ -9,8 +9,8 @@ import React, {
 } from 'react';
 import { Modal } from 'antd';
 import { get } from 'lodash-es';
-import { WrapperFile, UploadProps, ViewType } from '@/Upload';
-import { IMAGE_FALLBACK, withTry } from '@/utils';
+import { WrapperFile, UploadProps, ViewType } from '../../index';
+import { IMAGE_FALLBACK, withTry } from '../../../utils';
 import './index.less';
 
 export interface PreviewModalRef {

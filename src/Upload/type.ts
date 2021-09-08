@@ -129,6 +129,7 @@ export interface UploadProps
 
 export interface UploadInstance {
   getTask?: Upload['getTask'];
+  instance?: Upload;
 }
 
 export interface ViewFileProps

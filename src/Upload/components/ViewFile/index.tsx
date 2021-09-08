@@ -6,9 +6,9 @@ import {
   WrapperFile,
   UploadProps,
   UploadContext,
-} from '@/Upload';
-import { withTry } from '@/utils';
-import { isUploaded } from '@/Upload/utils';
+} from '../../index';
+import { withTry } from '../../../utils';
+import { isUploaded } from '../../utils';
 
 export type CancelMethod = (task: WrapperFile) => Promise<boolean>;
 export type UploadMethod = (task: WrapperFile) => Promise<void>;

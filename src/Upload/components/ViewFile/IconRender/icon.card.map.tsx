@@ -15,8 +15,8 @@ import {
 } from '@ant-design/icons';
 import classnames from 'classnames';
 import { get } from 'lodash-es';
-import { className, IMAGE_FALLBACK } from '@/utils';
-import { WrapperFile } from '@/Upload';
+import { className, IMAGE_FALLBACK } from '../../../../utils';
+import { WrapperFile } from '../../../index';
 import './index.less';
 
 export const DEFAULT_ICON = FileTwoTone;

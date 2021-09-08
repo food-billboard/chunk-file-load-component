@@ -1,7 +1,7 @@
 import { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { merge } from 'lodash-es';
 import { TWrapperTask, Upload, ECACHE_STATUS } from 'chunk-file-upload';
-import { UploadContext, UploadProps } from '@/Upload';
+import { UploadContext, UploadProps } from '../../index';
 
 const STATUS_MAP = {
   0: 'pending',

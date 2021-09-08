@@ -2,9 +2,9 @@ import React, { memo, useEffect, useMemo } from 'react';
 import { Progress as AntProgress } from 'antd';
 import type { ProgressProps } from 'antd';
 import classnames from 'classnames';
-import { useProgress, useStatus } from '@/Upload/utils';
-import { ProgressType } from '@/Upload/utils/hooks/useProgress';
-import { WrapperFile } from '@/Upload/type';
+import { useProgress, useStatus } from '../../../utils';
+import { ProgressType } from '../../../utils/hooks/useProgress';
+import { WrapperFile } from '../../../index';
 import './index.less';
 
 const Progress = memo(

@@ -55,6 +55,6 @@ export const isUploaded = (task: WrapperFile) => {
 
 export const createPreview = (file: File, task?: TWrapperTask) => {
   const type = file.type;
-  if (type.startsWith('image/')) return URL.createObjectURL(file);
+  if (type?.startsWith('image/')) return URL.createObjectURL(file);
   return '';
 };

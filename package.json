@@ -17,6 +17,11 @@
     "es/",
     "lib/"
   ],
+  "jest": {
+    "setupFilesAfterEnv": [
+      "./jest-setup-test.js"
+    ]
+  },
   "main": "dist/index.js",
   "module": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -51,10 +56,14 @@
     "babel-plugin-import": "^1.13.3",
     "cross-env": "^7.0.3",
     "dumi": "^1.0.16",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.6",
     "father-build": "^1.17.2",
     "gh-pages": "^3.2.3",
+    "jest": "^27.1.0",
     "lint-staged": "^10.0.7",
     "prettier": "^2.2.1",
+    "ts-jest": "^27.0.5",
     "yorkie": "^2.0.0"
   }
 }

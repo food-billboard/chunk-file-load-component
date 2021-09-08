@@ -117,6 +117,7 @@ const Upload = memo(
               });
             });
           }
+          callback?.(error, value);
         },
       };
     }, []);
@@ -245,9 +246,10 @@ const Upload = memo(
       () => {
         return {
           getTask,
+          instance: uploadInstance,
         };
       },
-      [getTask],
+      [getTask, uploadInstance],
     );
 
     const fileDomList = useMemo(() => {

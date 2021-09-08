@@ -7,10 +7,10 @@ import React, {
 } from 'react';
 import Progress from '../Progress';
 import ActionModal from './Action';
-import { UploadContext, WrapperFile, UploadProps } from '@/Upload';
+import { UploadContext, WrapperFile, UploadProps } from '../../../index';
 import Icon from '../IconRender';
 import { CancelMethod, UploadMethod, StopMethod } from '../index';
-import { useProgress } from '@/Upload/utils';
+import { useProgress } from '../../../utils';
 import './index.less';
 
 const ViewItem = memo(

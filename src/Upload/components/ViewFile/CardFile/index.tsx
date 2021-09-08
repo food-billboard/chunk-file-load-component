@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import ViewItem from './Item';
-import { itemRender } from '@/Upload/utils';
+import { itemRender } from '../../../utils';
 import { ViewDetailProps } from '../index';
 import './index.less';
 
