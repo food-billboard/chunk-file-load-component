@@ -13,7 +13,7 @@ if (type === 'lib') {
         {
           libraryName: 'antd',
           libraryDirectory: 'lib',
-          style: false,
+          style: true,
         },
         'antd',
       ],
@@ -26,12 +26,24 @@ if (type === 'lib') {
         },
         'lodash',
       ],
+      [
+        'babel-plugin-import',
+        {
+          libraryName: '@ant-design/icons',
+          libraryDirectory: 'lib',
+          style: true,
+        },
+        '@ant-design/icons',
+      ],
     ],
   };
 } else {
   config = {
     extractCSS: true,
-    esm: 'babel',
+    esm: {
+      type: 'babel',
+      importLibToEs: true,
+    },
     cjs: false,
     extraBabelPlugins: [
       [
@@ -51,6 +63,15 @@ if (type === 'lib') {
           camel2DashComponentName: false, // default: true
         },
         'lodash',
+      ],
+      [
+        'babel-plugin-import',
+        {
+          libraryName: '@ant-design/icons',
+          libraryDirectory: 'lib',
+          style: true,
+        },
+        '@ant-design/icons',
       ],
     ],
   };

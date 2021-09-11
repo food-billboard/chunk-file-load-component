@@ -28,7 +28,7 @@ const Progress = memo(
     const { error } = file;
 
     const [, , , progress, origin] = progressInfo;
-    const status = useStatus(file.task?.status ?? 1);
+    const status = useStatus(origin.step ?? 1);
 
     const percent = useMemo(() => {
       const { step } = origin;

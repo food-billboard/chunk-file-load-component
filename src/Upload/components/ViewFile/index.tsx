@@ -15,7 +15,7 @@ export type UploadMethod = (task: WrapperFile) => Promise<void>;
 export type StopMethod = (task: WrapperFile) => void;
 export type ViewDetailProps = Omit<
   ViewFileProps,
-  'instance' | 'onRemove' | 'onChange'
+  'instance' | 'onRemove' | 'onChange' | 'onCancel'
 > & {
   onCancel: CancelMethod;
   onUpload: UploadMethod;
@@ -71,11 +71,36 @@ export const actionIconPerformance = (
 };
 
 export default memo((props: ViewFileProps) => {
-  const { viewType, onChange, onRemove, instance, value, ...nextProps } = props;
+  const {
+    viewType,
+    onChange,
+    onRemove,
+    instance,
+    value = [],
+    onCancel: releasePreviewCache,
+    ...nextProps
+  } = props;
   const { setValue } = useContext(UploadContext);
+
+  const onStop: StopMethod = useCallback(
+    (task) => {
+      if (!isUploaded(task)) {
+        const fileTask = task.task!;
+        if (!fileTask) return;
+        const result = instance.stop(fileTask.symbol);
+        if (!result.length) {
+          console.warn(
+            'the task is not stop, please check whether this task is reasonable',
+          );
+        }
+      }
+    },
+    [instance],
+  );
 
   const onCancel: CancelMethod = useCallback(
     async (task) => {
+      // onStop(task)
       if (onRemove) {
         const [cancel, isCancel] = await withTry(onRemove)(task);
         if (!!cancel || isCancel === false) return false;
@@ -98,25 +123,11 @@ export default memo((props: ViewFileProps) => {
       const unCancelValue = value.filter(
         (item) => item.local?.value?.fileId !== local?.value?.fileId,
       );
-      onChange(unCancelValue);
+      releasePreviewCache(task);
+      setTimeout(onChange.bind(this, unCancelValue), 10);
       return true;
     },
-    [instance, value, onChange, onRemove],
-  );
-
-  const onStop: StopMethod = useCallback(
-    (task) => {
-      if (!isUploaded(task)) {
-        const fileTask = task.task!;
-        const result = instance.stop(fileTask.symbol);
-        if (!result.length) {
-          console.warn(
-            'the task is not stop, please check whether this task is reasonable',
-          );
-        }
-      }
-    },
-    [instance],
+    [instance, value, onChange, onRemove, releasePreviewCache],
   );
 
   const onUpload: UploadMethod = useCallback(

@@ -1,5 +1,5 @@
 import { CSSProperties, ReactNode, ReactElement } from 'react';
-import { DropzoneOptions } from 'react-dropzone';
+import { DropzoneOptions, FileRejection } from 'react-dropzone';
 import {
   TWrapperTask,
   Ttask,
@@ -48,7 +48,7 @@ export interface UploadProps
   value?: UploadProps['defaultValue'];
   onChange?: (value: WrapperFile[]) => void;
   onRemove?: (task: WrapperFile) => boolean | Promise<boolean>;
-  onValidator?: (errorFile: File[], fulfilledFile: File[]) => void;
+  onValidator?: (errorFile: FileRejection[], fulfilledFile: File[]) => void;
 
   style?: CSSProperties;
   className?: string;
@@ -129,6 +129,7 @@ export interface UploadProps
 
 export interface UploadInstance {
   getTask?: Upload['getTask'];
+  getFiles?: (origin?: boolean) => WrapperFile[];
   instance?: Upload;
 }
 
@@ -148,6 +149,7 @@ export interface ViewFileProps
   className?: string;
   style?: CSSProperties;
   onChange: (files: WrapperFile[]) => void;
+  onCancel: (files: WrapperFile | WrapperFile[]) => void;
 }
 
 export interface UploadContextType {

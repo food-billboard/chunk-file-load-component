@@ -30,7 +30,7 @@ export const completeFn = async (data) => {
   mockCache[data.name] = {};
 };
 
-export const FILE_SIZE = 1024 * 1024 * 6;
+export const FILE_SIZE = 1024 * 1024 * 20;
 export const FILE_NAME = 'test-file-name.png';
 export const FILE_TYPE = 'image/png';
 export const FILE_ID = Math.random().toString();
@@ -73,4 +73,8 @@ export const stopTask = (dom) => {
   return target;
 };
 
-export const deleteTask = () => {};
+export const deleteTask = (dom) => {
+  const target = dom.find('.chunk-upload-list-item button');
+  target.at(1).simulate('click');
+  return target;
+};

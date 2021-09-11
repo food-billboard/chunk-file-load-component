@@ -12,6 +12,7 @@ import classnames from 'classnames';
 import { useDropzone, DropzoneOptions } from 'react-dropzone';
 import { merge, noop, omit } from 'lodash-es';
 import { nanoid } from 'nanoid';
+import { useControllableValue } from 'ahooks';
 import {
   Upload as ChunkFileUpload,
   TRequestType,
@@ -24,7 +25,6 @@ import {
   propsValueFormat,
   Emitter,
   createPreview,
-  useControllableValue,
   install,
   getInstallMap,
 } from './utils';
@@ -66,7 +66,7 @@ const Upload = memo(
     const [files, setFiles] = useControllableValue<WrapperFile[]>(
       omit(props, ['defaultValue']),
       {
-        defaultValue: propsValueFormat(props.defaultValue),
+        defaultValue: (props.defaultValue as WrapperFile[]) || [],
       },
     );
     const [uploadInstance, setUploadInstance] = useState<ChunkFileUpload>();
@@ -76,7 +76,7 @@ const Upload = memo(
       style,
       showUploadList = true,
       immediately = true,
-      request,
+      request = {},
       lifecycle = {},
       actionUrl,
       method,
@@ -101,26 +101,28 @@ const Upload = memo(
       ...nextProps
     } = props;
 
-    const onError = useCallback((request: TRequestType) => {
-      const { callback, ...nextRequest } = request;
-      return {
-        ...nextRequest,
-        callback(error: any, value: any) {
-          if (!!error) {
-            setFiles((prev) => {
-              return prev.map((item) => {
+    const onError = useCallback(
+      (request: TRequestType) => {
+        const { callback, ...nextRequest } = request;
+        return {
+          ...nextRequest,
+          callback(error: any, value: any) {
+            if (!!error) {
+              const newFiles = files.map((item) => {
                 const { name } = item;
                 if (value !== name) return item;
                 return merge({}, item, {
                   error,
                 });
               });
-            });
-          }
-          callback?.(error, value);
-        },
-      };
-    }, []);
+              setFiles(newFiles);
+            }
+            callback?.(error, value);
+          },
+        };
+      },
+      [files],
+    );
 
     const taskGenerate = useCallback(
       (file: File) => {
@@ -203,14 +205,25 @@ const Upload = memo(
       (acceptedFiles, fileRejections) => {
         const { wrapperFiles, errorFiles } = addTask(acceptedFiles);
         onValidator?.(
-          [...errorFiles, ...fileRejections],
+          [
+            ...errorFiles.map((item) => {
+              return {
+                file: item,
+                errors: [
+                  {
+                    message: 'task add error',
+                    code: 'task add error',
+                  },
+                ],
+              };
+            }),
+            ...fileRejections,
+          ],
           wrapperFiles.map((item) => item.originFile!),
         );
-        setFiles((prev) => {
-          return [...prev, ...wrapperFiles];
-        });
+        setFiles([...files, ...wrapperFiles]);
       },
-      [addTask, onValidator],
+      [addTask, onValidator, files],
     );
 
     const validator = useMemo(() => {
@@ -241,15 +254,39 @@ const Upload = memo(
       [uploadInstance],
     );
 
+    const formatValue = useMemo(() => {
+      return propsValueFormat(files);
+    }, [files]);
+
+    const getFiles = useCallback(
+      (origin: boolean = false) => {
+        return origin ? formatValue : files;
+      },
+      [formatValue, files],
+    );
+
     useImperativeHandle(
       ref,
       () => {
         return {
           getTask,
           instance: uploadInstance,
+          getFiles,
         };
       },
-      [getTask, uploadInstance],
+      [getTask, uploadInstance, getFiles],
+    );
+
+    const releasePreviewCache = useCallback(
+      (files: WrapperFile | WrapperFile[]) => {
+        const realFiles = Array.isArray(files) ? files : [files];
+        realFiles.forEach((file) => {
+          try {
+            URL.revokeObjectURL(file.local?.value?.preview as string);
+          } catch (err) {}
+        });
+      },
+      [],
     );
 
     const fileDomList = useMemo(() => {
@@ -258,7 +295,7 @@ const Upload = memo(
           instance={uploadInstance!}
           style={viewStyle}
           className={viewClassName}
-          value={files || []}
+          value={formatValue || []}
           viewType={viewType}
           showUploadList={showUploadList}
           onChange={setFiles}
@@ -267,10 +304,11 @@ const Upload = memo(
           itemRender={itemRender}
           previewFile={previewFile}
           onPreviewFile={onPreviewFile}
+          onCancel={releasePreviewCache}
         />
       );
     }, [
-      files,
+      formatValue,
       viewType,
       uploadInstance,
       showUploadList,
@@ -281,6 +319,7 @@ const Upload = memo(
       previewFile,
       iconRender,
       onPreviewFile,
+      releasePreviewCache,
     ]);
 
     const contextValue = useMemo(() => {
@@ -291,17 +330,6 @@ const Upload = memo(
         setValue: setFiles,
       };
     }, [uploadInstance, locale]);
-
-    useEffect(
-      () => () => {
-        files.forEach((file) => {
-          try {
-            URL.revokeObjectURL(file.local?.value?.preview as string);
-          } catch (err) {}
-        });
-      },
-      [files],
-    );
 
     useEffect(() => {
       if (!!uploadInstance) return;

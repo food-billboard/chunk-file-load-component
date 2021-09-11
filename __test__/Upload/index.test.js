@@ -12,7 +12,6 @@ import {
   FILE_SIZE,
   FILE_NAME,
   FILE_TYPE,
-  promisify,
 } from './utils';
 
 global.URL.createObjectURL = jest.fn(() => 'faker createObjectURL');
@@ -23,8 +22,8 @@ jest.mock('nanoid', () => {
   };
 });
 
-describe(`Upload Component test`, () => {
-  test(`simple test`, async () => {
+describe(`error test`, () => {
+  it.skip(`simple test`, async () => {
     await new Promise(async (resolve, reject) => {
       const props = {
         viewType: 'list',
@@ -68,4 +67,8 @@ describe(`Upload Component test`, () => {
       uploadTask(wrapper);
     });
   });
+
+  it.skip(`remove file when the file is uploading`, () => {});
+
+  it.skip(`remove many file in little times and file is uploading`, () => {});
 });

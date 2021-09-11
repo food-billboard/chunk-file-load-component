@@ -167,7 +167,7 @@ const ViewItem = (
   }, [value]);
 
   const node = (
-    <li className={'chunk-upload-list-item'}>
+    <li key={value.id} className={'chunk-upload-list-item'}>
       <Icon
         className={'chunk-upload-list-item-icon'}
         iconRender={iconRender}
