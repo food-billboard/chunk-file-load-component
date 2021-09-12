@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useContext, useMemo } from 'react';
+import React, { memo, useCallback, useContext, useMemo, useRef } from 'react';
 import Card from './CardFile';
 import List from './ListFile';
 import {
@@ -7,19 +7,22 @@ import {
   UploadProps,
   UploadContext,
 } from '../../index';
+import PreviewModal, { PreviewModalRef } from '../Preview';
 import { withTry } from '../../../utils';
 import { isUploaded } from '../../utils';
 
 export type CancelMethod = (task: WrapperFile) => Promise<boolean>;
 export type UploadMethod = (task: WrapperFile) => Promise<void>;
 export type StopMethod = (task: WrapperFile) => void;
+export type PreviewMethod = (task: WrapperFile) => void;
 export type ViewDetailProps = Omit<
   ViewFileProps,
-  'instance' | 'onRemove' | 'onChange' | 'onCancel'
+  'instance' | 'onRemove' | 'onChange' | 'onCancel' | 'onPreviewFile'
 > & {
   onCancel: CancelMethod;
   onUpload: UploadMethod;
   onStop: StopMethod;
+  onPreview: PreviewMethod;
 };
 
 export const actionIconPerformance = (
@@ -78,9 +81,12 @@ export default memo((props: ViewFileProps) => {
     instance,
     value = [],
     onCancel: releasePreviewCache,
+    previewFile,
+    onPreviewFile,
     ...nextProps
   } = props;
   const { setValue } = useContext(UploadContext);
+  const previewModalRef = useRef<PreviewModalRef>(null);
 
   const onStop: StopMethod = useCallback(
     (task) => {
@@ -124,7 +130,7 @@ export default memo((props: ViewFileProps) => {
         (item) => item.local?.value?.fileId !== local?.value?.fileId,
       );
       releasePreviewCache(task);
-      setTimeout(onChange.bind(this, unCancelValue), 10);
+      setTimeout(onChange.bind(null, unCancelValue), 10);
       return true;
     },
     [instance, value, onChange, onRemove, releasePreviewCache],
@@ -165,6 +171,15 @@ export default memo((props: ViewFileProps) => {
     [instance, setValue],
   );
 
+  const onPreview: PreviewMethod = useCallback(
+    (value) => {
+      return previewModalRef.current?.open({
+        value,
+      });
+    },
+    [previewModalRef],
+  );
+
   const container = useMemo(() => {
     const props = {
       ...nextProps,
@@ -172,6 +187,7 @@ export default memo((props: ViewFileProps) => {
       onCancel,
       onStop,
       onUpload,
+      onPreview,
     };
     switch (viewType) {
       case 'card':
@@ -183,5 +199,15 @@ export default memo((props: ViewFileProps) => {
     }
   }, [viewType, nextProps, onCancel, onStop, onUpload, value]);
 
-  return container;
+  return (
+    <>
+      {container}
+      <PreviewModal
+        ref={previewModalRef}
+        previewFile={previewFile}
+        viewType={viewType!}
+        onPreviewFile={onPreviewFile}
+      />
+    </>
+  );
 });

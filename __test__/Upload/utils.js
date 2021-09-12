@@ -78,3 +78,9 @@ export const deleteTask = (dom) => {
   target.at(1).simulate('click');
   return target;
 };
+
+export const previewTask = (dom) => {
+  const target = dom.find('.chunk-upload-list-item button');
+  target.at(2).simulate('click');
+  return target;
+};

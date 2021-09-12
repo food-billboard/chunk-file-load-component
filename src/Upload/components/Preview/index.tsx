@@ -14,21 +14,21 @@ import { IMAGE_FALLBACK, withTry } from '../../../utils';
 import './index.less';
 
 export interface PreviewModalRef {
-  open: () => void;
+  open: (params: { value: WrapperFile }) => void;
 }
 
 export interface PreviewProps
   extends Pick<UploadProps, 'onPreviewFile' | 'previewFile'> {
-  value: WrapperFile;
   viewType: ViewType;
 }
 
 const PreviewModal = memo(
   forwardRef<PreviewModalRef, PreviewProps>((props, ref) => {
+    const [value, setValue] = useState<WrapperFile>();
     const [visible, setVisible] = useState<boolean>(false);
     const [customPreview, setCustomPreview] = useState<ReactNode | false>();
 
-    const { value, previewFile, viewType, onPreviewFile } = props;
+    const { previewFile, viewType, onPreviewFile } = props;
     const preview = get(value, 'local.value.preview');
 
     const fetchPreviewFile = useCallback(
@@ -44,14 +44,18 @@ const PreviewModal = memo(
       [],
     );
 
-    const open = useCallback(async () => {
-      const [, result] = onPreviewFile
-        ? await withTry(onPreviewFile)(value)
-        : [, true];
-      if (result) {
-        setVisible(true);
-      }
-    }, [onPreviewFile, value]);
+    const open = useCallback(
+      async ({ value }) => {
+        const [, result] = onPreviewFile
+          ? await withTry(onPreviewFile)(value)
+          : [, true];
+        if (result) {
+          setValue(value);
+          setVisible(true);
+        }
+      },
+      [onPreviewFile],
+    );
 
     useImperativeHandle(
       ref,
@@ -64,7 +68,7 @@ const PreviewModal = memo(
     );
 
     useEffect(() => {
-      if (visible) fetchPreviewFile(value, previewFile, viewType);
+      if (visible && !!value) fetchPreviewFile(value, previewFile, viewType);
     }, [value, viewType, previewFile, visible]);
 
     if (customPreview !== false && customPreview !== undefined && visible) {

@@ -95,6 +95,87 @@ export default () => {
 };
 ```
 
+立即上传:
+
+```tsx
+import React from 'react';
+import { Upload } from 'chunk-file-load-component';
+
+//mock local server
+let mockCache = {};
+
+const sleep = (times = 500) =>
+  new Promise((resolve) => setTimeout(resolve, times));
+
+export default () => {
+  const exitDataFn = async (
+    params: {
+      filename: string;
+      md5: string;
+      suffix: string;
+      size: number;
+      chunkSize: number;
+      chunksLength: number;
+    },
+    name: Symbol,
+  ) => {
+    await sleep();
+    console.log('exitDataFn', params);
+    mockCache[name] = {
+      max: params.chunksLength,
+      chunkSize: params.chunkSize,
+      size: params.size,
+      index: 0,
+    };
+    //Mock server response
+    return {
+      data: 0,
+    };
+  };
+
+  const uploadFn = async (data: FormData, name: Symbol) => {
+    await sleep();
+    console.log('uploadFn', data, name);
+    const size = mockCache[name].size;
+    mockCache[name].index++;
+    const nextOffset = mockCache[name].index * mockCache[name].chunkSize;
+    //Mock server response
+    return {
+      data: nextOffset >= size ? size : nextOffset,
+    };
+  };
+
+  const completeFn = async (data: any) => {
+    await sleep();
+    console.log('completeFn', data);
+    mockCache[data.name] = {};
+  };
+
+  return (
+    <>
+      <Upload
+        immediately
+        onRemove={sleep.bind(null, 1000)}
+        viewType="list"
+        request={
+          {
+            // exitDataFn,
+            // uploadFn,
+            // completeFn,
+            // callback(err, value) {
+            //   console.log(err, value);
+            //   if (!err) {
+            //     console.log('Upload Done!!');
+            //   }
+            // },
+          }
+        }
+      />
+    </>
+  );
+};
+```
+
 错误:
 
 ```tsx

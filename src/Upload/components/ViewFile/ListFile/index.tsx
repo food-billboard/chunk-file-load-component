@@ -4,7 +4,6 @@ import React, {
   useMemo,
   useState,
   useContext,
-  useRef,
   useEffect,
 } from 'react';
 import {
@@ -17,13 +16,13 @@ import classnames from 'classnames';
 import { Button } from 'antd';
 import Icon from '../IconRender';
 import Progress from '../Progress';
-import PreviewModal, { PreviewModalRef } from '../../Preview';
 import { UploadContext, WrapperFile, UploadProps } from '../../../index';
 import {
   CancelMethod,
   UploadMethod,
   StopMethod,
   ViewDetailProps,
+  PreviewMethod,
   actionIconPerformance,
 } from '../index';
 import { itemRender, useProgress } from '../../../utils';
@@ -37,9 +36,10 @@ type ViewItemProps = {
   onCancel: CancelMethod;
   onUpload: UploadMethod;
   onStop: StopMethod;
+  onPreview: PreviewMethod;
 } & Pick<
   UploadProps,
-  'showUploadList' | 'iconRender' | 'previewFile' | 'viewType' | 'onPreviewFile'
+  'showUploadList' | 'iconRender' | 'previewFile' | 'viewType'
 >;
 
 const ViewItem = (
@@ -52,7 +52,6 @@ const ViewItem = (
   const [isComplete, setIsComplete] = useState<boolean>(false);
 
   const { instance } = useContext(UploadContext);
-  const previewModalRef = useRef<PreviewModalRef>(null);
 
   const {
     value,
@@ -64,7 +63,7 @@ const ViewItem = (
     previewFile,
     showUploadList,
     itemRender,
-    onPreviewFile,
+    onPreview,
   } = props;
   const { task, local, id, error, name } = value;
   const progressInfo = useProgress(name);
@@ -84,6 +83,10 @@ const ViewItem = (
     !result && setCancelLoading(false);
   }, [value, onCancel]);
 
+  const handlePreview = useCallback(() => {
+    return onPreview?.(value);
+  }, [onPreview, value]);
+
   const uploadButtonAction = useCallback(
     (uploadIcon: any, stopIcon: any) => {
       if (isDealing && !error) {
@@ -100,10 +103,6 @@ const ViewItem = (
     setIsDealing(isDealing);
     setIsComplete(isComplete);
   }, [task, instance]);
-
-  const onPreview = useCallback(() => {
-    previewModalRef.current?.open();
-  }, []);
 
   const actionRender = useMemo(() => {
     if (!showUploadList) return null;
@@ -142,7 +141,7 @@ const ViewItem = (
             loading={cancelLoading}
             type="link"
             danger={!!error}
-            onClick={onPreview}
+            onClick={handlePreview}
             icon={previewIconNode || <EyeOutlined />}
             disabled={!value.local?.value?.preview && !previewFile}
           />
@@ -187,13 +186,6 @@ const ViewItem = (
         <span>{local?.value?.filename || local?.value?.fileId || id}</span>
       </div>
       {actionRender}
-      <PreviewModal
-        ref={previewModalRef}
-        value={value}
-        previewFile={previewFile}
-        viewType={viewType}
-        onPreviewFile={onPreviewFile}
-      />
     </li>
   );
 
@@ -220,7 +212,7 @@ const ListFile = memo((props: ViewDetailProps) => {
     style,
     className,
     previewFile,
-    onPreviewFile,
+    onPreview,
   } = props;
 
   const list = useMemo(() => {
@@ -238,7 +230,7 @@ const ListFile = memo((props: ViewDetailProps) => {
           viewType={viewType}
           itemRender={result}
           previewFile={previewFile}
-          onPreviewFile={onPreviewFile}
+          onPreview={onPreview}
         />
       );
     });
@@ -251,7 +243,6 @@ const ListFile = memo((props: ViewDetailProps) => {
     onUpload,
     onCancel,
     showUploadList,
-    onPreviewFile,
   ]);
 
   return (

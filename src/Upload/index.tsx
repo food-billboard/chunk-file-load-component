@@ -12,7 +12,6 @@ import classnames from 'classnames';
 import { useDropzone, DropzoneOptions } from 'react-dropzone';
 import { merge, noop, omit } from 'lodash-es';
 import { nanoid } from 'nanoid';
-import { useControllableValue } from 'ahooks';
 import {
   Upload as ChunkFileUpload,
   TRequestType,
@@ -27,6 +26,7 @@ import {
   createPreview,
   install,
   getInstallMap,
+  useControllableValue,
 } from './utils';
 import {
   UploadProps,
@@ -101,27 +101,25 @@ const Upload = memo(
       ...nextProps
     } = props;
 
+    const callbackWrapper = (callback: any, error: any, value: any) => {
+      if (!!error) {
+        setFiles((prev) => {
+          console.log(prev, 1111111);
+          return prev;
+        });
+      }
+      callback?.(error, value);
+    };
+
     const onError = useCallback(
       (request: TRequestType) => {
         const { callback, ...nextRequest } = request;
         return {
           ...nextRequest,
-          callback(error: any, value: any) {
-            if (!!error) {
-              const newFiles = files.map((item) => {
-                const { name } = item;
-                if (value !== name) return item;
-                return merge({}, item, {
-                  error,
-                });
-              });
-              setFiles(newFiles);
-            }
-            callback?.(error, value);
-          },
+          callback: callbackWrapper.bind(null, callback),
         };
       },
-      [files],
+      [files, callbackWrapper],
     );
 
     const taskGenerate = useCallback(
@@ -150,7 +148,7 @@ const Upload = memo(
           },
         };
       },
-      [request, actionUrl, withCredentials, onError, headers, method],
+      [request, actionUrl, withCredentials, onError, headers, method, files],
     );
 
     const addTask = useCallback(

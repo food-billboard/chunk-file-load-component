@@ -9,7 +9,12 @@ import Progress from '../Progress';
 import ActionModal from './Action';
 import { UploadContext, WrapperFile, UploadProps } from '../../../index';
 import Icon from '../IconRender';
-import { CancelMethod, UploadMethod, StopMethod } from '../index';
+import {
+  CancelMethod,
+  UploadMethod,
+  StopMethod,
+  PreviewMethod,
+} from '../index';
 import { useProgress } from '../../../utils';
 import './index.less';
 
@@ -20,14 +25,11 @@ const ViewItem = memo(
       onCancel: CancelMethod;
       onUpload: UploadMethod;
       onStop: StopMethod;
+      onPreview: PreviewMethod;
       itemRender: any;
     } & Pick<
       UploadProps,
-      | 'showUploadList'
-      | 'iconRender'
-      | 'viewType'
-      | 'previewFile'
-      | 'onPreviewFile'
+      'showUploadList' | 'iconRender' | 'viewType' | 'previewFile'
     >,
   ) => {
     const [isDealing, setIsDealing] = useState<boolean>(false);
@@ -45,7 +47,7 @@ const ViewItem = memo(
       iconRender,
       showUploadList,
       itemRender,
-      onPreviewFile,
+      onPreview,
     } = props;
     const { task, local, id, name } = value;
     const progressInfo = useProgress(name);
@@ -97,7 +99,7 @@ const ViewItem = memo(
           previewFile={previewFile}
           showUploadList={showUploadList}
           viewType={viewType}
-          onPreviewFile={onPreviewFile}
+          onPreview={onPreview}
         />
       </div>
     );
