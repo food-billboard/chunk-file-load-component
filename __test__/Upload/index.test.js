@@ -71,4 +71,6 @@ describe(`error test`, () => {
   it.skip(`remove file when the file is uploading`, () => {});
 
   it.skip(`remove many file in little times and file is uploading`, () => {});
+
+  it.skip(`use the callback style setState on onChange`, () => {});
 });

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useUpdateEffect } from 'ahooks';
+import useUpdateEffect from './useUpdateEffect';
 
 export interface Options<T> {
   defaultValue?: T;
@@ -12,6 +12,8 @@ export interface Props {
   [key: string]: any;
 }
 
+type ReturnValueType<T = any> = [T, (value: ((val: T) => T) | T) => void];
+
 interface StandardProps<T> {
   value: T;
   defaultValue?: T;
@@ -19,11 +21,11 @@ interface StandardProps<T> {
 }
 function useControllableValue<T = any>(
   props: StandardProps<T>,
-): [T, (val: T) => void];
+): ReturnValueType<T>;
 function useControllableValue<T = any>(
   props?: Props,
   options?: Options<T>,
-): [T, (v: T, ...args: any[]) => void];
+): ReturnValueType<T>;
 function useControllableValue<T = any>(
   props: Props = {},
   options: Options<T> = {},

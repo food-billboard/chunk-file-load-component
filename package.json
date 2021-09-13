@@ -38,7 +38,6 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
-    "ahooks": "^2.10.9",
     "antd": "^4.16.11",
     "chunk-file-upload": "^1.0.8",
     "classnames": "^2.3.1",

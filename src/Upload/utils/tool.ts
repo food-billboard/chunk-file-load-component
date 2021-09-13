@@ -23,10 +23,16 @@ export const mergeDefaultTask = (task: PartialWrapperFile): WrapperFile => {
       id: nanoid(),
     }) as WrapperFile;
   }
-  return merge({}, DEFAULT_UN_COMPLETE_FILE, task, {
+
+  return {
     getTask: () => task.task?.status,
+    ...DEFAULT_UN_COMPLETE_FILE,
     id: nanoid(),
-  }) as WrapperFile;
+    get task() {
+      return task.task || undefined;
+    },
+    ...task,
+  } as WrapperFile;
 };
 
 export const propsValueFormat = (value: UploadProps['defaultValue']) => {

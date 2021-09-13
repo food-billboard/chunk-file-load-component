@@ -26,11 +26,11 @@ import {
   createPreview,
   install,
   getInstallMap,
-  useControllableValue,
 } from './utils';
+import { useControllableValue } from '../utils';
 import {
   UploadProps,
-  UploadInstance,
+  UploadInstanceType,
   WrapperFile,
   UploadContextType,
   CustomAction,
@@ -52,6 +52,10 @@ function lifecycleFormat(lifecycle: TLifecycle) {
   }, {} as any);
 }
 
+const UploadInstance = new ChunkFileUpload({
+  lifecycle: lifecycleFormat({}),
+});
+
 export const UploadContext = createContext<UploadContextType>({
   instance: {} as any,
   emitter,
@@ -62,14 +66,13 @@ export const UploadContext = createContext<UploadContextType>({
 const { Provider } = UploadContext;
 
 const Upload = memo(
-  forwardRef<UploadInstance, UploadProps>((props, ref) => {
+  forwardRef<UploadInstanceType, UploadProps>((props, ref) => {
     const [files, setFiles] = useControllableValue<WrapperFile[]>(
       omit(props, ['defaultValue']),
       {
         defaultValue: (props.defaultValue as WrapperFile[]) || [],
       },
     );
-    const [uploadInstance, setUploadInstance] = useState<ChunkFileUpload>();
 
     const {
       className,
@@ -104,8 +107,12 @@ const Upload = memo(
     const callbackWrapper = (callback: any, error: any, value: any) => {
       if (!!error) {
         setFiles((prev) => {
-          console.log(prev, 1111111);
-          return prev;
+          return prev.map((item) => {
+            if (item.name !== value) return item;
+            return merge({}, item, {
+              error,
+            });
+          });
         });
       }
       callback?.(error, value);
@@ -128,7 +135,7 @@ const Upload = memo(
         if (actionUrl && !!actionRequest && !request) {
           const { request, ...nextAction } = actionRequest({
             url: actionUrl,
-            instance: uploadInstance!,
+            instance: UploadInstance,
             withCredentials: !!withCredentials,
             headers,
             method,
@@ -139,6 +146,7 @@ const Upload = memo(
             file: {
               file,
             },
+            lifecycle,
           };
         }
         return {
@@ -146,9 +154,19 @@ const Upload = memo(
           file: {
             file,
           },
+          lifecycle,
         };
       },
-      [request, actionUrl, withCredentials, onError, headers, method, files],
+      [
+        request,
+        actionUrl,
+        withCredentials,
+        onError,
+        headers,
+        method,
+        files,
+        lifecycle,
+      ],
     );
 
     const addTask = useCallback(
@@ -159,16 +177,18 @@ const Upload = memo(
           errorFiles: File[];
         }>(
           (acc, file: File) => {
-            const tasks = uploadInstance?.add(taskGenerate(file));
+            const tasks = UploadInstance?.add(taskGenerate(file));
             if (Array.isArray(tasks) && tasks.length === 1) {
               const [name] = tasks;
-              const task = uploadInstance!.getTask(name);
+              const task = UploadInstance.getTask(name);
               const id = nanoid();
               const wrapperTask: WrapperFile = {
                 originFile: file,
                 name,
                 id,
-                task: task || undefined,
+                get task() {
+                  return UploadInstance.getTask(name) || task || undefined;
+                },
                 local: {
                   type: 'local',
                   value: {
@@ -183,7 +203,7 @@ const Upload = memo(
                 },
               };
               acc.wrapperFiles.push(wrapperTask);
-              if (immediately) uploadInstance!.deal(name);
+              if (immediately) UploadInstance.deal(name);
             } else {
               acc.errorFiles.push(file);
             }
@@ -196,7 +216,7 @@ const Upload = memo(
         );
         return wrapperFiles;
       },
-      [uploadInstance, request, taskGenerate],
+      [request, taskGenerate],
     );
 
     const onDrop: DropzoneOptions['onDrop'] = useCallback(
@@ -245,12 +265,9 @@ const Upload = memo(
       }),
     );
 
-    const getTask = useCallback(
-      (name) => {
-        return uploadInstance!.getTask(name);
-      },
-      [uploadInstance],
-    );
+    const getTask = useCallback((name) => {
+      return UploadInstance!.getTask(name);
+    }, []);
 
     const formatValue = useMemo(() => {
       return propsValueFormat(files);
@@ -268,11 +285,10 @@ const Upload = memo(
       () => {
         return {
           getTask,
-          instance: uploadInstance,
           getFiles,
         };
       },
-      [getTask, uploadInstance, getFiles],
+      [getTask, getFiles],
     );
 
     const releasePreviewCache = useCallback(
@@ -290,7 +306,7 @@ const Upload = memo(
     const fileDomList = useMemo(() => {
       return (
         <ViewFile
-          instance={uploadInstance!}
+          instance={UploadInstance}
           style={viewStyle}
           className={viewClassName}
           value={formatValue || []}
@@ -308,7 +324,6 @@ const Upload = memo(
     }, [
       formatValue,
       viewType,
-      uploadInstance,
       showUploadList,
       viewClassName,
       viewStyle,
@@ -322,20 +337,12 @@ const Upload = memo(
 
     const contextValue = useMemo(() => {
       return {
-        instance: uploadInstance!,
+        instance: UploadInstance,
         emitter,
         locale,
         setValue: setFiles,
       };
-    }, [uploadInstance, locale]);
-
-    useEffect(() => {
-      if (!!uploadInstance) return;
-      const instance = new ChunkFileUpload({
-        lifecycle: lifecycleFormat(lifecycle),
-      });
-      setUploadInstance(instance);
-    }, [lifecycle, uploadInstance]);
+    }, [locale]);
 
     return (
       <Provider value={contextValue}>

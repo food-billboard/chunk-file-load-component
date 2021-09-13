@@ -127,10 +127,9 @@ export interface UploadProps
   };
 }
 
-export interface UploadInstance {
+export interface UploadInstanceType {
   getTask?: Upload['getTask'];
   getFiles?: (origin?: boolean) => WrapperFile[];
-  instance?: Upload;
 }
 
 export interface ViewFileProps

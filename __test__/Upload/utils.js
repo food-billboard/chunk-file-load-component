@@ -68,8 +68,8 @@ export const uploadTask = (dom) => {
 };
 
 export const stopTask = (dom) => {
-  const target = dom.find('.chunk-upload-list-item button:nth-pf-type(1)');
-  target.simulate('click');
+  const target = dom.find('.chunk-upload-list-item button');
+  target.at(0).simulate('click');
   return target;
 };
 

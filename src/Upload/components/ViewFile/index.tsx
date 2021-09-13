@@ -147,19 +147,24 @@ export default memo((props: ViewFileProps) => {
         } else if (!error) {
           result = instance.deal(fileTask.symbol);
         } else if (task.task) {
-          setValue(
-            (prev: WrapperFile[]) => {
-              return prev.map((item) => {
-                if (item.id !== task.id) return item;
-                return {
-                  ...item,
-                  error: null,
-                };
-              });
-            },
-            () => {},
-          );
-          result = instance.uploading(task.task);
+          setValue((prev: WrapperFile[]) => {
+            return prev.map((item) => {
+              if (item.id !== task.id) return item;
+              result = instance.uploading(task.task!);
+              const [name] = result;
+              const newTask = name ? instance.getTask(name) : item.task;
+              return {
+                ...item,
+                get task() {
+                  return newTask || item.task;
+                },
+                getStatus() {
+                  return (newTask || item.task)?.status;
+                },
+                error: null,
+              };
+            });
+          });
         }
         if (!result.length) {
           console.warn(

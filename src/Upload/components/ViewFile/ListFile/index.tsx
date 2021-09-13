@@ -65,7 +65,7 @@ const ViewItem = (
     itemRender,
     onPreview,
   } = props;
-  const { task, local, id, error, name } = value;
+  const { task, local, id, error, name, getStatus } = value;
   const progressInfo = useProgress(name);
   const [complete, total, current] = progressInfo;
 
@@ -98,11 +98,11 @@ const ViewItem = (
   );
 
   const onProgressChange = useCallback(() => {
-    const isDealing = !!task?.tool.file.isTaskDealing(task);
-    const isComplete = !!task?.tool.file.isTaskComplete(task);
+    const isDealing = !!task?.tool.file.isTaskDealing(value.task);
+    const isComplete = !!task?.tool.file.isTaskComplete(value.task);
     setIsDealing(isDealing);
     setIsComplete(isComplete);
-  }, [task, instance]);
+  }, [value.task, instance]);
 
   const actionRender = useMemo(() => {
     if (!showUploadList) return null;
