@@ -1,10 +1,13 @@
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useContext } from 'react';
 import { Progress as AntProgress } from 'antd';
 import type { ProgressProps } from 'antd';
 import classnames from 'classnames';
-import { useProgress, useStatus } from '../../../utils';
-import { ProgressType } from '../../../utils/hooks/useProgress';
-import { WrapperFile } from '../../../index';
+import { useProgress } from '../../../utils';
+import {
+  ProgressType,
+  getProcessStatusLocale,
+} from '../../../utils/hooks/useProgress';
+import { WrapperFile, UploadContext } from '../../../index';
 import './index.less';
 
 const Progress = memo(
@@ -16,6 +19,7 @@ const Progress = memo(
       progress: ReturnType<typeof useProgress>;
     },
   ) => {
+    const { locale } = useContext(UploadContext);
     const {
       file,
       className,
@@ -28,7 +32,7 @@ const Progress = memo(
     const { error } = file;
 
     const [, , , progress, origin] = progressInfo;
-    const status = useStatus(file.getStatus() ?? 1);
+    const status = getProcessStatusLocale(file.getStatus() ?? 1, locale);
 
     const percent = useMemo(() => {
       const { step } = origin;

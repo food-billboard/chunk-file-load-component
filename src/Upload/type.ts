@@ -49,6 +49,7 @@ export interface UploadProps
   onChange?: (value: WrapperFile[]) => void;
   onRemove?: (task: WrapperFile) => boolean | Promise<boolean>;
   onValidator?: (errorFile: FileRejection[], fulfilledFile: File[]) => void;
+  onError?: (error: any, task: WrapperFile) => void;
 
   style?: CSSProperties;
   className?: string;
@@ -105,6 +106,7 @@ export interface UploadProps
   }) => ReactNode;
 
   immediately?: boolean;
+  limit?: number;
 
   actionUrl?: string | [string, string, string?];
   method?: [string | false, string, string | false];

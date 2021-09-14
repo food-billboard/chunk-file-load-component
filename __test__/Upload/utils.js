@@ -61,14 +61,21 @@ export const triggerUploadClick = (dom) => {
   return target;
 };
 
-export const uploadTask = (dom) => {
-  const target = dom.find('.chunk-upload-list-item button');
+export const uploadTask = (dom, isList = true) => {
+  const find = isList
+    ? '.chunk-upload-list-item button'
+    : '.chunk-upload-action-modal button';
+  const target = dom.find(find);
   target.at(0).simulate('click');
   return target;
 };
 
-export const stopTask = (dom) => {
-  const target = dom.find('.chunk-upload-list-item button');
+export const stopTask = (dom, isList = true) => {
+  const find = isList
+    ? '.chunk-upload-list-item button'
+    : '.chunk-upload-action-modal button';
+  const target = dom.find(find);
+  console.log(target.length);
   target.at(0).simulate('click');
   return target;
 };

@@ -75,17 +75,19 @@ const ViewItem = memo(
     const node = (
       <div className={'chunk-upload-card-item'}>
         <Icon iconRender={iconRender} file={value} viewType={viewType!} />
-        {!isComplete && (
-          <Progress
-            file={value}
-            onChange={onProgressChange}
-            className="chunk-upload-card-item-progress"
-            style={{ flexDirection: 'column', width: '100%' }}
-            showInfo={false}
-            strokeWidth={5}
-            progress={progressInfo}
-          />
-        )}
+        <Progress
+          file={value}
+          onChange={onProgressChange}
+          className="chunk-upload-card-item-progress"
+          style={{
+            flexDirection: 'column',
+            width: '100%',
+            visibility: isComplete ? 'hidden' : 'visible',
+          }}
+          showInfo={false}
+          strokeWidth={5}
+          progress={progressInfo}
+        />
         <div className="chunk-upload-card-item-info">
           <span>{local?.value?.filename || local?.value?.fileId || id}</span>
         </div>

@@ -65,7 +65,7 @@ const ViewItem = (
     itemRender,
     onPreview,
   } = props;
-  const { task, local, id, error, name, getStatus } = value;
+  const { task, local, id, error, name } = value;
   const progressInfo = useProgress(name);
   const [complete, total, current] = progressInfo;
 

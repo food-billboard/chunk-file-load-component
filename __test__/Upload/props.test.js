@@ -2217,25 +2217,747 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe('maxFiles test', () => {
-    it(`set maxFiles limit the file length`, (done) => {});
+  describe.skip('maxFiles test', () => {
+    it(`set maxFiles limit the file length`, (done) => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        onChange(value) {
+          expect(value.length).toEqual(0);
+          done();
+        },
+        onValidator(error) {
+          expect(error.length).toEqual(2);
+        },
+        maxFiles: 1,
+        multiple: true,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      act(() => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+      });
+    });
+
+    it(`set maxFiles for 0 to not limit the file length`, (done) => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        onChange(value) {
+          expect(value.length).toEqual(2);
+          done();
+        },
+        onValidator(error) {
+          expect(error.length).toEqual(0);
+        },
+        maxFiles: 0,
+        multiple: true,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      act(() => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+      });
+    });
+
+    it(`not set maxFiles to not limit the file length`, (done) => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        onChange(value) {
+          expect(value.length).toEqual(2);
+          done();
+        },
+        onValidator(error) {
+          expect(error.length).toEqual(0);
+        },
+        multiple: true,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      act(() => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+      });
+    });
+  });
+
+  describe.skip('limit test', () => {
+    it(`set limit the file length`, () => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        limit: 1,
+        value: [MOCK_COMPLETE_STRING_FILE],
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      expect(wrapper.exists('.chunk-upload-dropzone-list')).toBeFalsy();
+    });
+
+    it(`set limit the file length and the custom container params isLimit is true`, () => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        limit: 1,
+        value: [MOCK_COMPLETE_STRING_FILE],
+        containerRender: ({ isLimit }) => {
+          expect(isLimit).toBeTruthy();
+          return <span></span>;
+        },
+      };
+
+      mount(<Upload {...props} />);
+    });
+
+    it(`not set limit the file length`, () => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        value: [MOCK_COMPLETE_STRING_FILE],
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      expect(wrapper.exists('.chunk-upload-dropzone-list')).toBeTruthy();
+    });
+
+    it(`set limit value for -1`, () => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        value: [MOCK_COMPLETE_STRING_FILE],
+        limit: -1,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      expect(wrapper.exists('.chunk-upload-dropzone-list')).toBeTruthy();
+    });
   });
 
   describe.skip('disabled test', () => {
-    it(`set disabled to disable click upload`, () => {});
+    it(`set disabled to disable click upload`, async () => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        disabled: true,
+      };
 
-    it(`set disabled to disable drop upload`, () => {});
-  });
+      const ref = React.createRef();
 
-  describe.skip('validator test', () => {
-    it(`set custom validator rule`, () => {});
+      const wrapper = mount(<Upload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(100);
+
+        expect(ref.current.getFiles().length).toEqual(0);
+      });
+    });
+
+    it(`set disabled to disable drop upload`, async () => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        disabled: true,
+      };
+
+      const ref = React.createRef();
+
+      const wrapper = mount(<Upload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('drop', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(100);
+
+        expect(ref.current.getFiles().length).toEqual(0);
+      });
+    });
   });
 
   describe.skip('multiple test', () => {
-    it(`can select multiple file`, () => {});
+    it(`can select multiple file`, (done) => {
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        onChange(value) {
+          expect(value.length).toEqual(2);
+          done();
+        },
+        multiple: true,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      act(() => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+      });
+    });
   });
 
   describe.skip('locale test', () => {
-    it(`set locale`, () => {});
+    const valid = (value, wrapper, find) => {
+      const wrapperProgress = wrapper.find(find);
+      wrapperProgress.update();
+      expect(wrapperProgress.text()).toEqual(value);
+    };
+
+    it(`set locale list`, async () => {
+      await new Promise(async (resolve, reject) => {
+        const ref = React.createRef();
+
+        const locale = {
+          container: 'testLocaleListContainer',
+          containerIcon: 'testLocaleListContainerIcon',
+          progress: {
+            pending: 'testLocaleListPending',
+            waiting: 'testLocaleListWaiting',
+            reading: 'testLocaleListReading',
+            uploading: 'testLocaleListUploading',
+            fulfilled: 'testLocaleListFulfilled',
+          },
+        };
+
+        const props = {
+          viewType: 'list',
+          immediately: false,
+          request: {
+            ...DEFAULT_REQUEST,
+            callback: (error, value) => {
+              valid(
+                locale.progress.fulfilled,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+              if (error) {
+                reject(error);
+              } else {
+                resolve();
+              }
+            },
+          },
+          locale: locale,
+          lifecycle: {
+            beforeRead() {
+              valid(
+                locale.progress.reading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            reading() {
+              valid(
+                locale.progress.reading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            beforeCheck() {
+              valid(
+                locale.progress.uploading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            afterCheck() {
+              valid(
+                locale.progress.uploading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            uploading() {
+              valid(
+                locale.progress.uploading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            beforeComplete() {
+              valid(
+                locale.progress.uploading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            afterComplete() {
+              valid(
+                locale.progress.fulfilled,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+          },
+        };
+
+        const wrapper = mount(<Upload ref={ref} {...props} />);
+        const wrapperIcon = wrapper.find('.chunk-upload-container-icon');
+        expect(wrapperIcon.text().includes(locale.containerIcon)).toBeTruthy();
+        const wrapperContainer = wrapper.find('.chunk-upload-dropzone-list');
+        expect(wrapperContainer.text().includes(locale.container)).toBeTruthy();
+
+        await act(async () => {
+          wrapper.find('input').simulate('change', {
+            target: {
+              files: [
+                ChunkUpload.arraybuffer2file(
+                  new ArrayBuffer(FILE_SIZE),
+                  FILE_NAME,
+                  {
+                    type: FILE_TYPE,
+                  },
+                ),
+              ],
+            },
+          });
+
+          await sleep(1000);
+
+          wrapper.update();
+
+          const files = ref.current.getFiles();
+          expect(files.length).toEqual(1);
+          expect(files[0].getStatus() == 0).toBeTruthy();
+
+          uploadTask(wrapper);
+
+          await sleep(1000);
+        });
+      });
+    });
+
+    it(`set locale card`, async () => {
+      await new Promise(async (resolve, reject) => {
+        const ref = React.createRef();
+
+        const locale = {
+          container: 'testLocaleCardContainer',
+          containerIcon: 'testLocaleCardContainerIcon',
+          progress: {
+            pending: 'testLocaleCardPending',
+            waiting: 'testLocaleCardWaiting',
+            reading: 'testLocaleCardReading',
+            uploading: 'testLocaleCardUploading',
+            fulfilled: 'testLocaleCardFulfilled',
+          },
+        };
+
+        const props = {
+          viewType: 'card',
+          immediately: false,
+          request: {
+            ...DEFAULT_REQUEST,
+            callback: (error, value) => {
+              valid(
+                locale.progress.fulfilled,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+              if (error) {
+                reject(error);
+              } else {
+                resolve();
+              }
+            },
+          },
+          locale: locale,
+          lifecycle: {
+            beforeRead() {
+              valid(
+                locale.progress.reading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            reading() {
+              valid(
+                locale.progress.reading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            beforeCheck() {
+              valid(
+                locale.progress.uploading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            afterCheck() {
+              valid(
+                locale.progress.uploading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            uploading() {
+              valid(
+                locale.progress.uploading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            beforeComplete() {
+              valid(
+                locale.progress.uploading,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+            afterComplete() {
+              valid(
+                locale.progress.fulfilled,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+          },
+        };
+
+        const wrapper = mount(<Upload ref={ref} {...props} />);
+        const wrapperIcon = wrapper.find(
+          '.chunk-upload-dropzone-card-content-icon-content',
+        );
+        expect(wrapperIcon.text().includes(locale.containerIcon)).toBeTruthy();
+        const wrapperContainer = wrapper.find(
+          '.chunk-upload-dropzone-card-content',
+        );
+        expect(wrapperContainer.text().includes(locale.container)).toBeTruthy();
+
+        await act(async () => {
+          wrapper.find('input').simulate('change', {
+            target: {
+              files: [
+                ChunkUpload.arraybuffer2file(
+                  new ArrayBuffer(FILE_SIZE),
+                  FILE_NAME,
+                  {
+                    type: FILE_TYPE,
+                  },
+                ),
+              ],
+            },
+          });
+
+          await sleep(1000);
+
+          wrapper.update();
+
+          const files = ref.current.getFiles();
+          expect(files.length).toEqual(1);
+          expect(files[0].getStatus() == 0).toBeTruthy();
+
+          uploadTask(wrapper, false);
+
+          await sleep(1000);
+        });
+      });
+    });
+
+    it(`set locale on stop locale`, async () => {
+      await new Promise(async (resolve, reject) => {
+        let stopDone = false;
+
+        const ref = React.createRef();
+
+        const locale = {
+          progress: {
+            stopping: 'testLocaleListStopStopping',
+          },
+        };
+
+        const props = {
+          viewType: 'list',
+          immediately: false,
+          request: {
+            ...DEFAULT_REQUEST,
+            uploadFn: () => {
+              wrapper.update();
+              stopTask(wrapper);
+            },
+            callback: (error, value) => {
+              expect(stopDone).toBeTruthy();
+              if (error) {
+                resolve();
+              } else {
+                reject();
+              }
+            },
+          },
+          locale: locale,
+          lifecycle: {
+            afterStop: () => {
+              stopDone = true;
+              valid(
+                locale.progress.stopping,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+            },
+          },
+        };
+
+        const wrapper = mount(<Upload ref={ref} {...props} />);
+
+        await act(async () => {
+          wrapper.find('input').simulate('change', {
+            target: {
+              files: [
+                ChunkUpload.arraybuffer2file(
+                  new ArrayBuffer(FILE_SIZE),
+                  FILE_NAME,
+                  {
+                    type: FILE_TYPE,
+                  },
+                ),
+              ],
+            },
+          });
+
+          await sleep(1000);
+
+          wrapper.update();
+
+          const files = ref.current.getFiles();
+          expect(files.length).toEqual(1);
+          expect(files[0].getStatus() == 0).toBeTruthy();
+
+          uploadTask(wrapper);
+
+          await sleep(1000);
+        });
+      });
+    });
+
+    it(`set locale on reject locale`, async () => {
+      await new Promise(async (resolve, reject) => {
+        const ref = React.createRef();
+
+        const locale = {
+          progress: {
+            rejected: 'testLocaleListRejectRejected',
+          },
+        };
+
+        const props = {
+          viewType: 'list',
+          immediately: false,
+          request: {
+            ...DEFAULT_REQUEST,
+            uploadFn: () => {
+              throw new Error();
+            },
+            callback: (error, value) => {
+              valid(
+                locale.progress.rejected,
+                wrapper,
+                '.chunk-upload-list-progress-status',
+              );
+              if (error) {
+                resolve();
+              } else {
+                reject();
+              }
+            },
+          },
+          locale: locale,
+        };
+
+        const wrapper = mount(<Upload ref={ref} {...props} />);
+
+        await act(async () => {
+          wrapper.find('input').simulate('change', {
+            target: {
+              files: [
+                ChunkUpload.arraybuffer2file(
+                  new ArrayBuffer(FILE_SIZE),
+                  FILE_NAME,
+                  {
+                    type: FILE_TYPE,
+                  },
+                ),
+              ],
+            },
+          });
+
+          await sleep(1000);
+
+          wrapper.update();
+
+          const files = ref.current.getFiles();
+          expect(files.length).toEqual(1);
+          expect(files[0].getStatus() == 0).toBeTruthy();
+
+          uploadTask(wrapper);
+
+          await sleep(1000);
+        });
+      });
+    });
+  });
+
+  describe.skip('onError test', () => {
+    it('upload error deal the onError', async () => {
+      await new Promise(async (resolve, reject) => {
+        const ref = React.createRef();
+        let errorDone = false;
+
+        const props = {
+          viewType: 'list',
+          immediately: true,
+          onError: (error, files) => {
+            errorDone = true;
+            expect(!!error).toBeTruthy();
+            expect(files.error === error).toBeTruthy();
+          },
+          request: {
+            ...DEFAULT_REQUEST,
+            completeFn: () => {
+              throw new Error();
+            },
+            callback: (error) => {
+              try {
+                expect(!!error).toBeTruthy();
+                expect(errorDone).toBeTruthy();
+              } catch (err) {
+                reject(err);
+              }
+              resolve();
+            },
+          },
+        };
+
+        const wrapper = mount(<Upload ref={ref} {...props} />);
+
+        await act(async () => {
+          wrapper.find('input').simulate('change', {
+            target: {
+              files: [
+                ChunkUpload.arraybuffer2file(
+                  new ArrayBuffer(FILE_SIZE),
+                  FILE_NAME,
+                  {
+                    type: FILE_TYPE,
+                  },
+                ),
+              ],
+            },
+          });
+
+          await sleep(1000);
+
+          wrapper.update();
+
+          const files = ref.current.getFiles();
+          expect(files.length).toEqual(1);
+        });
+      });
+    });
   });
 });

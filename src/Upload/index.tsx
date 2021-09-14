@@ -101,19 +101,27 @@ const Upload = memo(
       validator: propsValidator,
       onPreviewFile,
       multiple = false,
+      limit = -1,
+      onError: propsOnError,
       ...nextProps
     } = props;
 
     const callbackWrapper = (callback: any, error: any, value: any) => {
       if (!!error) {
+        let errorFiles: any;
+        let dealError = false;
         setFiles((prev) => {
           return prev.map((item) => {
-            if (item.name !== value) return item;
-            return merge({}, item, {
+            if (item.name !== value || item.task?.tool.file.isStop())
+              return item;
+            dealError = true;
+            errorFiles = merge({}, item, {
               error,
             });
+            return errorFiles;
           });
         });
+        dealError && propsOnError?.(error, errorFiles);
       }
       callback?.(error, value);
     };
@@ -367,8 +375,8 @@ const Upload = memo(
             containerRender={containerRender}
             root={getRootProps<any>({})}
             input={getInputProps<any>({})}
-            maxFiles={nextProps.maxFiles}
             currentFiles={files?.length || 0}
+            limit={limit}
           />
           {!!showUploadList && fileDomList}
         </div>
