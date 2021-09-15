@@ -1,19 +1,6 @@
-import {
-  FileImageTwoTone,
-  FileMarkdownTwoTone,
-  FilePdfTwoTone,
-  FilePptTwoTone,
-  FileTextTwoTone,
-  FileUnknownTwoTone,
-  FileWordTwoTone,
-  FileZipTwoTone,
-  FolderOutlined,
-  VideoCameraTwoTone,
-  FileOutlined,
-  FileTwoTone,
-} from '@ant-design/icons';
+import React from 'react';
 
-export const DEFAULT_ICON = FileTwoTone;
+export const DEFAULT_ICON: any = null;
 
 const iconValidatorMap = {
   image(type: string) {
@@ -65,18 +52,8 @@ export const formatType = (type: string) => {
   return result;
 };
 
-const IconMap = {
-  image: FileImageTwoTone,
-  video: VideoCameraTwoTone,
-  markdown: FileMarkdownTwoTone,
-  pdf: FilePdfTwoTone,
-  ppt: FilePptTwoTone,
-  text: FileTextTwoTone,
-  unknown: FileUnknownTwoTone,
-  word: FileWordTwoTone,
-  zip: FileZipTwoTone,
-};
+const IconListMap = {};
 
-export default IconMap;
+export default IconListMap;
 
 // folder: FolderOutlined

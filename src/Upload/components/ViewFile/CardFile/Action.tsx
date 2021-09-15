@@ -15,7 +15,6 @@ import {
 } from '@ant-design/icons';
 import { WrapperFile, UploadProps } from '../../../index';
 import { CancelMethod, actionIconPerformance, PreviewMethod } from '../index';
-import { className } from '../../../../utils';
 
 const ActionModal = memo(
   (

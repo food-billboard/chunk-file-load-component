@@ -68,7 +68,7 @@ if (type === 'lib') {
         'babel-plugin-import',
         {
           libraryName: '@ant-design/icons',
-          libraryDirectory: 'lib',
+          libraryDirectory: 'es',
           style: true,
         },
         '@ant-design/icons',
