@@ -75,7 +75,6 @@ export const stopTask = (dom, isList = true) => {
     ? '.chunk-upload-list-item button'
     : '.chunk-upload-action-modal button';
   const target = dom.find(find);
-  console.log(target.length);
   target.at(0).simulate('click');
   return target;
 };

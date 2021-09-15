@@ -4,8 +4,6 @@ import React, {
   useImperativeHandle,
   useCallback,
   useMemo,
-  useState,
-  useEffect,
   createContext,
 } from 'react';
 import classnames from 'classnames';
@@ -25,6 +23,7 @@ import {
   Emitter,
   createPreview,
   install,
+  uninstall,
   getInstallMap,
 } from './utils';
 import { useControllableValue } from '../utils';
@@ -140,7 +139,7 @@ const Upload = memo(
     const taskGenerate = useCallback(
       (file: File) => {
         const actionRequest = getInstallMap('request');
-        if (actionUrl && !!actionRequest && !request) {
+        if (actionUrl && !!actionRequest && !Object.keys(request).length) {
           const { request, ...nextAction } = actionRequest({
             url: actionUrl,
             instance: UploadInstance,
@@ -390,8 +389,10 @@ const WrapperUpload: typeof Upload & {
     key: keyof CustomAction,
     action: CustomAction[keyof CustomAction],
   ) => void;
+  uninstall: (key: keyof CustomAction) => void;
 } = Upload as any;
 
 WrapperUpload.install = install;
+WrapperUpload.uninstall = uninstall;
 
 export default WrapperUpload;

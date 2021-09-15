@@ -12,39 +12,38 @@ import {
   FILE_SIZE,
   FILE_NAME,
   FILE_TYPE,
+  deleteTask,
 } from './utils';
 
-global.URL.createObjectURL = jest.fn(() => 'faker createObjectURL');
-
-jest.mock('nanoid', () => {
-  return {
-    nanoid: () => Math.random(),
-  };
-});
-
 describe(`error test`, () => {
-  it.skip(`simple test`, async () => {
+  it(`remove file when the file is uploading`, async () => {
     await new Promise(async (resolve, reject) => {
+      const ref = React.createRef();
+
+      let first = true;
+
       const props = {
         viewType: 'list',
+        onChange: (value) => {
+          if (first) {
+            expect(value.length).toEqual(1);
+            first = false;
+          } else {
+            expect(value.length).toEqual(0);
+            resolve();
+          }
+        },
         request: {
           exitDataFn,
           uploadFn,
           completeFn,
-          callback(err, value) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
-            }
-          },
         },
+        immediately: false,
       };
 
-      const wrapper = mount(<Upload {...props} />);
+      let wrapper = mount(<Upload ref={ref} {...props} />);
 
       await act(async () => {
-        await sleep(100);
         wrapper.find('input').simulate('change', {
           target: {
             files: [
@@ -61,16 +60,91 @@ describe(`error test`, () => {
 
         await sleep(1000);
 
+        wrapper = wrapper.update();
+
+        uploadTask(wrapper);
+
+        await sleep(100);
+
+        deleteTask(wrapper);
+
         wrapper.update();
       });
-
-      uploadTask(wrapper);
     });
   });
 
-  it.skip(`remove file when the file is uploading`, () => {});
+  it.skip(`remove many file in little times and file is uploading`, async () => {
+    await new Promise(async (resolve, reject) => {
+      const ref = React.createRef();
 
-  it.skip(`remove many file in little times and file is uploading`, () => {});
+      let index = true;
+
+      const props = {
+        viewType: 'list',
+        onChange: (value) => {
+          if (first) {
+            expect(value.length).toEqual(1);
+          } else {
+            expect(value.length).toEqual(0);
+            resolve();
+          }
+        },
+        request: {
+          exitDataFn,
+          uploadFn,
+          completeFn,
+        },
+        immediately: false,
+      };
+
+      let wrapper = mount(<Upload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(1000);
+
+        wrapper = wrapper.update();
+
+        uploadTask(wrapper);
+
+        await sleep(100);
+
+        deleteTask(wrapper);
+
+        wrapper.update();
+
+        const files = ref.current.getFiles();
+        expect(files.length).toEqual(0);
+      });
+    });
+  });
 
   it.skip(`use the callback style setState on onChange`, () => {});
 });

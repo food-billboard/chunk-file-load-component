@@ -21,14 +21,6 @@ import {
   MOCK_COMPLETE_OBJECT_FILE,
 } from './constants';
 
-global.URL.createObjectURL = jest.fn(() => 'faker createObjectURL');
-
-jest.mock('nanoid', () => {
-  return {
-    nanoid: () => Math.random().toString(),
-  };
-});
-
 const DEFAULT_REQUEST = {
   exitDataFn,
   uploadFn,
@@ -87,8 +79,8 @@ const isUploadValidFile = (files, another) => {
   });
 };
 
-describe(`Upload Component test`, () => {
-  describe.skip('defaultValue test', () => {
+describe.skip(`Upload Component test`, () => {
+  describe('defaultValue test', () => {
     it(`defaultValue set string`, async () => {
       const props = {
         viewType: 'list',
@@ -123,7 +115,7 @@ describe(`Upload Component test`, () => {
 
     it(`defaultValue set PartialWrapperFile`, () => {
       const name = MOCK_COMPLETE_OBJECT_FILE.name;
-      const testName = MOCK_COMPLETE_OBJECT_FILE.filename;
+      const testName = MOCK_COMPLETE_OBJECT_FILE.local.value.filename;
 
       const props = {
         viewType: 'list',
@@ -144,7 +136,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('value test', () => {
+  describe('value test', () => {
     it(`value set string`, async () => {
       await new Promise(async (resolve, reject) => {
         let changeValue = [MOCK_COMPLETE_STRING_FILE];
@@ -252,7 +244,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('onChange test', () => {
+  describe('onChange test', () => {
     it(`onChange set`, async () => {
       await new Promise(async (resolve, reject) => {
         const ref = React.createRef();
@@ -260,9 +252,13 @@ describe(`Upload Component test`, () => {
         const props = {
           viewType: 'list',
           onChange: (value) => {
-            expect(value).toBeInstanceOf(Array);
-            expect(value.length).toEqual(1);
-            isUploadValidFile(value);
+            try {
+              expect(value).toBeInstanceOf(Array);
+              expect(value.length).toEqual(1);
+              isUploadValidFile(value);
+            } catch (err) {
+              reject(err);
+            }
             resolve();
           },
           request: {
@@ -275,7 +271,6 @@ describe(`Upload Component test`, () => {
         const wrapper = mount(<Upload ref={ref} {...props} />);
 
         await act(async () => {
-          await sleep(100);
           wrapper.find('input').simulate('change', {
             target: {
               files: [
@@ -296,7 +291,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('onValidator test', () => {
+  describe('onValidator test', () => {
     it(`onValidator fulfilled test`, async () => {
       await new Promise(async (resolve, reject) => {
         const message = 'message-error';
@@ -419,7 +414,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('onRemove test', () => {
+  describe('onRemove test', () => {
     it(`onRemove return false test`, async () => {
       await new Promise(async (resolve, reject) => {
         const ref = React.createRef();
@@ -716,157 +711,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('viewStyle test', () => {
-    it(`viewStyle test`, (done) => {
-      let changeValue = [MOCK_COMPLETE_STRING_FILE];
-      const testStyle = {
-        color: 'red',
-      };
-
-      const props = {
-        viewType: 'list',
-        value: changeValue,
-        immediately: false,
-        viewStyle: testStyle,
-      };
-
-      const wrapper = mount(<Upload {...props} />);
-
-      const aside = wrapper.find('aside');
-
-      const asideProps = aside.props();
-
-      expect(asideProps.style).toBeDefined();
-      const isEqual = Object.entries(testStyle).every((item) => {
-        const [key, value] = item;
-        return asideProps.style[key] === value;
-      });
-
-      expect(isEqual).toBeTruthy();
-
-      done();
-    });
-  });
-
-  describe.skip('viewClassName test', () => {
-    it(`viewClassName test`, (done) => {
-      let changeValue = [MOCK_COMPLETE_STRING_FILE];
-      const testClassName = 'testClassName';
-
-      const props = {
-        viewType: 'list',
-        value: changeValue,
-        immediately: false,
-        viewClassName: testClassName,
-      };
-
-      const wrapper = mount(<Upload {...props} />);
-
-      const aside = wrapper.find('aside');
-
-      expect(aside.hasClass(testClassName)).toBeTruthy();
-
-      done();
-    });
-  });
-
-  describe.skip('viewType test', () => {
-    it(`set list viewType test`, (done) => {
-      let changeValue = [MOCK_COMPLETE_STRING_FILE];
-
-      const props = {
-        viewType: 'list',
-        value: changeValue,
-        immediately: false,
-      };
-
-      const wrapper = mount(<Upload {...props} />);
-
-      expect(wrapper.exists('.chunk-upload-list-item')).toBeTruthy();
-
-      done();
-    });
-
-    it(`set card viewType test`, (done) => {
-      let changeValue = [MOCK_COMPLETE_STRING_FILE];
-
-      const props = {
-        viewType: 'card',
-        value: changeValue,
-        immediately: false,
-      };
-
-      const wrapper = mount(<Upload {...props} />);
-
-      expect(wrapper.exists('.chunk-upload-card-item')).toBeTruthy();
-
-      done();
-    });
-
-    it(`not set viewType test`, (done) => {
-      let changeValue = [MOCK_COMPLETE_STRING_FILE];
-
-      const props = {
-        value: changeValue,
-        immediately: false,
-      };
-
-      const wrapper = mount(<Upload {...props} />);
-
-      expect(wrapper.exists('.chunk-upload-list-item')).toBeTruthy();
-
-      done();
-    });
-  });
-
-  describe.skip('iconRender test', () => {
-    it(`iconRender return newElement test`, (done) => {
-      let changeValue = [MOCK_COMPLETE_STRING_FILE];
-      const defineIconNodeClass = 'defineIconNodeClass';
-
-      const props = {
-        viewType: 'list',
-        value: changeValue,
-        immediately: false,
-        iconRender: (file, viewType, originNode) => {
-          expect(file).toBeDefined();
-          expect(viewType).toEqual('list');
-          expect(originNode).toBeDefined();
-          return <span className={defineIconNodeClass}></span>;
-        },
-      };
-
-      const wrapper = mount(<Upload {...props} />);
-
-      expect(wrapper.exists(`.${defineIconNodeClass}`)).toBeTruthy();
-
-      done();
-    });
-
-    it(`iconRender return originElement test`, (done) => {
-      let changeValue = [MOCK_COMPLETE_STRING_FILE];
-
-      const props = {
-        viewType: 'list',
-        value: changeValue,
-        immediately: false,
-        iconRender: (file, viewType, originNode) => {
-          expect(file).toBeDefined();
-          expect(viewType).toEqual('list');
-          expect(originNode).toBeDefined();
-          return originNode;
-        },
-      };
-
-      const wrapper = mount(<Upload {...props} />);
-
-      expect(wrapper.exists(`.chunk-upload-view-list-icon`)).toBeTruthy();
-
-      done();
-    });
-  });
-
-  describe.skip('itemRender test', () => {
+  describe('itemRender test', () => {
     it(`itemRender return newElement test`, async () => {
       const defineItemNodeClass = 'defineItemNodeClass';
 
@@ -992,7 +837,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('showUploadList test', () => {
+  describe('showUploadList test', () => {
     it(`showUploadList return false`, (done) => {
       const changeValue = [MOCK_COMPLETE_STRING_FILE];
 
@@ -1399,7 +1244,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('previewFile test', () => {
+  describe('previewFile test', () => {
     it(`previewFile return false that use the default preview`, async () => {
       const props = {
         viewType: 'list',
@@ -1502,9 +1347,10 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('onPreviewFile test', () => {
+  describe('onPreviewFile test', () => {
     it(`onPreviewFile return false and that not show the preview`, async () => {
       let previewDone = false;
+      let previewFileDone = false;
 
       const props = {
         viewType: 'list',
@@ -1512,6 +1358,9 @@ describe(`Upload Component test`, () => {
         onPreviewFile() {
           previewDone = true;
           return false;
+        },
+        previewFile: () => {
+          previewFileDone = true;
         },
       };
 
@@ -1542,8 +1391,7 @@ describe(`Upload Component test`, () => {
         previewTask(wrapper);
         await sleep(1000);
         wrapper.update();
-        const modal = document.querySelector(`.ant-modal-wrap`);
-        expect(!!modal).toBeFalsy();
+        expect(previewFileDone).toBeFalsy();
         expect(previewDone).toBeTruthy();
       });
     });
@@ -1601,7 +1449,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('containerRender test', () => {
+  describe('containerRender test', () => {
     it(`containerRender return list viewType container`, async () => {
       const testClassName = 'testClassName-container';
 
@@ -1663,7 +1511,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('immediately test', () => {
+  describe('immediately test', () => {
     it(`immediately set true will upload immediately`, async () => {
       const ref = React.createRef();
 
@@ -1741,7 +1589,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('lifecycle test', () => {
+  describe('lifecycle test', () => {
     it(`normal lifecycle test`, async () => {
       await new Promise(async (resolve, reject) => {
         const ref = React.createRef();
@@ -2112,7 +1960,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('accept test', () => {
+  describe('accept test', () => {
     it(`accept video set test`, (done) => {
       const props = {
         viewType: 'list',
@@ -2147,7 +1995,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('minSize test', () => {
+  describe('minSize test', () => {
     it(`set minSize limit the fileSize`, (done) => {
       const props = {
         viewType: 'list',
@@ -2182,7 +2030,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('maxSize test', () => {
+  describe('maxSize test', () => {
     it(`set maxSize limit the fileSize`, (done) => {
       const props = {
         viewType: 'list',
@@ -2217,7 +2065,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('maxFiles test', () => {
+  describe('maxFiles test', () => {
     it(`set maxFiles limit the file length`, (done) => {
       const props = {
         viewType: 'list',
@@ -2341,7 +2189,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('limit test', () => {
+  describe('limit test', () => {
     it(`set limit the file length`, () => {
       const props = {
         viewType: 'list',
@@ -2396,7 +2244,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('disabled test', () => {
+  describe('disabled test', () => {
     it(`set disabled to disable click upload`, async () => {
       const props = {
         viewType: 'list',
@@ -2462,7 +2310,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('multiple test', () => {
+  describe('multiple test', () => {
     it(`can select multiple file`, (done) => {
       const props = {
         viewType: 'list',
@@ -2501,7 +2349,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('locale test', () => {
+  describe('locale test', () => {
     const valid = (value, wrapper, find) => {
       const wrapperProgress = wrapper.find(find);
       wrapperProgress.update();
@@ -2902,7 +2750,7 @@ describe(`Upload Component test`, () => {
     });
   });
 
-  describe.skip('onError test', () => {
+  describe('onError test', () => {
     it('upload error deal the onError', async () => {
       await new Promise(async (resolve, reject) => {
         const ref = React.createRef();
@@ -2958,6 +2806,156 @@ describe(`Upload Component test`, () => {
           expect(files.length).toEqual(1);
         });
       });
+    });
+  });
+
+  describe('viewStyle test', () => {
+    it(`viewStyle test`, (done) => {
+      let changeValue = [MOCK_COMPLETE_STRING_FILE];
+      const testStyle = {
+        color: 'red',
+      };
+
+      const props = {
+        viewType: 'list',
+        value: changeValue,
+        immediately: false,
+        viewStyle: testStyle,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      const aside = wrapper.find('aside');
+
+      const asideProps = aside.props();
+
+      expect(asideProps.style).toBeDefined();
+      const isEqual = Object.entries(testStyle).every((item) => {
+        const [key, value] = item;
+        return asideProps.style[key] === value;
+      });
+
+      expect(isEqual).toBeTruthy();
+
+      done();
+    });
+  });
+
+  describe('viewClassName test', () => {
+    it(`viewClassName test`, (done) => {
+      let changeValue = [MOCK_COMPLETE_STRING_FILE];
+      const testClassName = 'testClassName';
+
+      const props = {
+        viewType: 'list',
+        value: changeValue,
+        immediately: false,
+        viewClassName: testClassName,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      const aside = wrapper.find('aside');
+
+      expect(aside.hasClass(testClassName)).toBeTruthy();
+
+      done();
+    });
+  });
+
+  describe('viewType test', () => {
+    it(`set list viewType test`, (done) => {
+      let changeValue = [MOCK_COMPLETE_STRING_FILE];
+
+      const props = {
+        viewType: 'list',
+        value: changeValue,
+        immediately: false,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      expect(wrapper.exists('.chunk-upload-list-item')).toBeTruthy();
+
+      done();
+    });
+
+    it(`set card viewType test`, (done) => {
+      let changeValue = [MOCK_COMPLETE_STRING_FILE];
+
+      const props = {
+        viewType: 'card',
+        value: changeValue,
+        immediately: false,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      expect(wrapper.exists('.chunk-upload-card-item')).toBeTruthy();
+
+      done();
+    });
+
+    it(`not set viewType test`, (done) => {
+      let changeValue = [MOCK_COMPLETE_STRING_FILE];
+
+      const props = {
+        value: changeValue,
+        immediately: false,
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      expect(wrapper.exists('.chunk-upload-list-item')).toBeTruthy();
+
+      done();
+    });
+  });
+
+  describe('iconRender test', () => {
+    it(`iconRender return newElement test`, (done) => {
+      let changeValue = [MOCK_COMPLETE_STRING_FILE];
+      const defineIconNodeClass = 'defineIconNodeClass';
+
+      const props = {
+        viewType: 'list',
+        value: changeValue,
+        immediately: false,
+        iconRender: (file, viewType, originNode) => {
+          expect(file).toBeDefined();
+          expect(viewType).toEqual('list');
+          expect(originNode).toBeDefined();
+          return <span className={defineIconNodeClass}></span>;
+        },
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      expect(wrapper.exists(`.${defineIconNodeClass}`)).toBeTruthy();
+
+      done();
+    });
+
+    it(`iconRender return originElement test`, (done) => {
+      let changeValue = [MOCK_COMPLETE_STRING_FILE];
+
+      const props = {
+        viewType: 'list',
+        value: changeValue,
+        immediately: false,
+        iconRender: (file, viewType, originNode) => {
+          expect(file).toBeDefined();
+          expect(viewType).toEqual('list');
+          expect(originNode).toBeDefined();
+          return originNode;
+        },
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      expect(wrapper.exists(`.chunk-upload-view-list-icon`)).toBeTruthy();
+
+      done();
     });
   });
 });
