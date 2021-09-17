@@ -11,11 +11,16 @@
       type="image/x-icon"
       href="https://user-images.githubusercontent.com/9554297/83762004-a0761b00-a6a9-11ea-83b4-9c8ff721d4b8.png"
     />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://gw.alipayobjects.com/os/lib/antd/4.16.11/dist/antd.css"
+    />
     <script>
       window.routerBase = "/";
     </script>
     <script>
-      //! umi version: 3.5.17
+      //! umi version: 3.5.8
     </script>
     <script>
       !(function () {
@@ -24,7 +29,7 @@
           r = ["light", "dark", "auto"];
         document.documentElement.setAttribute(
           "data-prefers-color",
-          e === r[2] ? (t ? r[1] : r[0]) : r.indexOf(e) > -1 ? e : r[0]
+          e === r[2] ? (t ? r[1] : r[0]) : r.includes(e) ? e : r[0]
         );
       })();
     </script>
@@ -33,6 +38,9 @@
   <body>
     <div id="root"></div>
 
-    <script src="./umi.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react/16.14.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/react-dom/16.14.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/antd/4.16.11/antd.min.js"></script>
+    <script src="./umi.76dbd1a5.js"></script>
   </body>
 </html>
