@@ -1,6 +1,5 @@
 {
   "yarn": true,
-  "contents": "lib",
   "branch": "main",
   "cleanup": true,
   "tests": true,
