@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useContext, useMemo, useRef } from 'react';
+import { noop } from 'lodash';
 import Card from './CardFile';
 import List from './ListFile';
 import {
@@ -104,12 +105,22 @@ export default memo((props: ViewFileProps) => {
     [instance],
   );
 
+  const stopActionWhenRequestCancel = useCallback(() => {
+    // TODO
+    return {
+      stop: noop,
+      done: noop,
+    };
+  }, []);
+
   const onCancel: CancelMethod = useCallback(
     async (task) => {
-      // onStop(task)
       if (onRemove) {
+        const { stop, done } = stopActionWhenRequestCancel();
+        stop();
         const [cancel, isCancel] = await withTry(onRemove)(task);
         if (!!cancel || isCancel === false) return false;
+        done();
       }
       const { local, error } = task;
       if (!isUploaded(task)) {
@@ -126,14 +137,15 @@ export default memo((props: ViewFileProps) => {
           );
         }
       }
-      const unCancelValue = value.filter(
-        (item) => item.local?.value?.fileId !== local?.value?.fileId,
-      );
+      const unCancelValue = (value: WrapperFile[]) =>
+        value.filter(
+          (item) => item.local?.value?.fileId !== local?.value?.fileId,
+        );
       releasePreviewCache(task);
       setTimeout(onChange.bind(null, unCancelValue), 10);
       return true;
     },
-    [instance, value, onChange, onRemove, releasePreviewCache],
+    [instance, onChange, onRemove, releasePreviewCache],
   );
 
   const onUpload: UploadMethod = useCallback(

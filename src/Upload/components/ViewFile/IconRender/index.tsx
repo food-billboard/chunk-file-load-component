@@ -1,18 +1,20 @@
 import React, { CSSProperties, memo, useMemo } from 'react';
 import classnames from 'classnames';
-import { merge } from 'lodash-es';
-import FileImageTwoTone from '@ant-design/icons/FileImageTwoTone';
-import FileMarkdownTwoTone from '@ant-design/icons/FileMarkdownTwoTone';
-import FilePdfTwoTone from '@ant-design/icons/FilePdfTwoTone';
-import FilePptTwoTone from '@ant-design/icons/FilePptTwoTone';
-import FileTextTwoTone from '@ant-design/icons/FileTextTwoTone';
-import FileUnknownTwoTone from '@ant-design/icons/FileUnknownTwoTone';
-import FileWordTwoTone from '@ant-design/icons/FileWordTwoTone';
-import FileZipTwoTone from '@ant-design/icons/FileZipTwoTone';
-import FolderOutlined from '@ant-design/icons/FolderOutlined';
-import VideoCameraTwoTone from '@ant-design/icons/VideoCameraTwoTone';
-import FileOutlined from '@ant-design/icons/FileOutlined';
-import FileTwoTone from '@ant-design/icons/FileTwoTone';
+import { merge } from 'lodash';
+import {
+  FileImageTwoTone,
+  FileMarkdownTwoTone,
+  FilePdfTwoTone,
+  FilePptTwoTone,
+  FileTextTwoTone,
+  FileUnknownTwoTone,
+  FileWordTwoTone,
+  FileZipTwoTone,
+  FolderOutlined,
+  VideoCameraTwoTone,
+  FileOutlined,
+  FileTwoTone,
+} from '@ant-design/icons';
 import IconListMap, {
   DEFAULT_ICON as DEFAULT_LIST_ICON,
   formatType as listFormatType,

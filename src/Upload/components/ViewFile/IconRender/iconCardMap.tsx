@@ -1,6 +1,6 @@
 import React, { memo, CSSProperties } from 'react';
 import classnames from 'classnames';
-import { get } from 'lodash-es';
+import { get } from 'lodash';
 import FileImageTwoTone from '@ant-design/icons/FileImageTwoTone';
 import { className, IMAGE_FALLBACK } from '../../../../utils';
 import { WrapperFile } from '../../../index';

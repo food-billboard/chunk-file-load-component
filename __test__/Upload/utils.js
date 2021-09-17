@@ -61,13 +61,14 @@ export const triggerUploadClick = (dom) => {
   return target;
 };
 
-export const uploadTask = (dom, isList = true) => {
+export const uploadTask = (dom, index = 0, isList = true) => {
   const find = isList
-    ? '.chunk-upload-list-item button'
-    : '.chunk-upload-action-modal button';
+    ? '.chunk-upload-list-item'
+    : '.chunk-upload-action-modal';
   const target = dom.find(find);
-  target.at(0).simulate('click');
-  return target;
+  const button = target.at(index).find('button');
+  button.at(0).simulate('click');
+  return button;
 };
 
 export const stopTask = (dom, isList = true) => {
@@ -79,10 +80,14 @@ export const stopTask = (dom, isList = true) => {
   return target;
 };
 
-export const deleteTask = (dom) => {
-  const target = dom.find('.chunk-upload-list-item button');
-  target.at(1).simulate('click');
-  return target;
+export const deleteTask = (dom, index = 0, isList = true) => {
+  const find = isList
+    ? '.chunk-upload-list-item'
+    : '.chunk-upload-action-modal';
+  const target = dom.find(find);
+  const button = target.at(index).find('button');
+  button.at(1).simulate('click');
+  return button;
 };
 
 export const previewTask = (dom) => {

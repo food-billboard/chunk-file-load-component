@@ -73,28 +73,39 @@ describe(`error test`, () => {
     });
   });
 
-  it.skip(`remove many file in little times and file is uploading`, async () => {
+  it(`remove many file in little times and file is uploading`, async () => {
     await new Promise(async (resolve, reject) => {
       const ref = React.createRef();
 
-      let index = true;
+      let index = 0;
 
       const props = {
         viewType: 'list',
-        onChange: (value) => {
-          if (first) {
+        onRemove: async () => {
+          await sleep(300);
+          index++;
+          if (index == 3) {
+            const value = ref.current.getFiles();
+            expect(value).toBeInstanceOf(Array);
             expect(value.length).toEqual(1);
-          } else {
-            expect(value.length).toEqual(0);
-            resolve();
+            sleep(100).then((_) => {
+              const value = ref.current.getFiles();
+              expect(value.length).toEqual(0);
+              resolve();
+            });
           }
+          return true;
         },
         request: {
-          exitDataFn,
+          exitDataFn: async (...args) => {
+            await sleep(300);
+            return exitDataFn(...args);
+          },
           uploadFn,
           completeFn,
         },
         immediately: false,
+        multiple: true,
       };
 
       let wrapper = mount(<Upload ref={ref} {...props} />);
@@ -132,19 +143,79 @@ describe(`error test`, () => {
 
         wrapper = wrapper.update();
 
-        uploadTask(wrapper);
+        for (let i = 0; i < 3; i++) {
+          uploadTask(wrapper, i);
+          await sleep(60);
+        }
 
-        await sleep(100);
-
-        deleteTask(wrapper);
+        for (let i = 0; i < 3; i++) {
+          deleteTask(wrapper, i);
+          await sleep(60);
+        }
 
         wrapper.update();
-
-        const files = ref.current.getFiles();
-        expect(files.length).toEqual(0);
       });
     });
   });
 
-  it.skip(`use the callback style setState on onChange`, () => {});
+  it(`use the callback style setState on onChange`, async () => {
+    await new Promise(async (resolve, reject) => {
+      const ref = React.createRef();
+      let errorDone = false;
+
+      const props = {
+        viewType: 'list',
+        immediately: true,
+        onError: (error, files) => {
+          errorDone = true;
+          expect(!!error).toBeTruthy();
+          expect(files.error === error).toBeTruthy();
+        },
+        onChange: (value) => {
+          expect(value).toBeInstanceOf(Array);
+        },
+        request: {
+          exitDataFn,
+          uploadFn,
+          completeFn: () => {
+            throw new Error();
+          },
+          callback: (error) => {
+            try {
+              expect(!!error).toBeTruthy();
+              expect(errorDone).toBeTruthy();
+            } catch (err) {
+              reject(err);
+            }
+            resolve();
+          },
+        },
+      };
+
+      const wrapper = mount(<Upload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(1000);
+
+        wrapper.update();
+
+        const files = ref.current.getFiles();
+        expect(files.length).toEqual(1);
+      });
+    });
+  });
 });

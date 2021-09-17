@@ -26,15 +26,6 @@ if (type === 'lib') {
         },
         'lodash',
       ],
-      [
-        'babel-plugin-import',
-        {
-          libraryName: '@ant-design/icons',
-          libraryDirectory: 'lib',
-          style: true,
-        },
-        '@ant-design/icons',
-      ],
     ],
   };
 } else {
@@ -63,15 +54,6 @@ if (type === 'lib') {
           camel2DashComponentName: false, // default: true
         },
         'lodash',
-      ],
-      [
-        'babel-plugin-import',
-        {
-          libraryName: '@ant-design/icons',
-          libraryDirectory: 'es',
-          style: true,
-        },
-        '@ant-design/icons',
       ],
     ],
   };

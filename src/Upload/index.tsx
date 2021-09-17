@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import classnames from 'classnames';
 import { useDropzone, DropzoneOptions } from 'react-dropzone';
-import { merge, noop, omit } from 'lodash-es';
+import { merge, noop, omit } from 'lodash';
 import { nanoid } from 'nanoid';
 import {
   Upload as ChunkFileUpload,

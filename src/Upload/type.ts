@@ -149,7 +149,9 @@ export interface ViewFileProps
   value: WrapperFile[];
   className?: string;
   style?: CSSProperties;
-  onChange: (files: WrapperFile[]) => void;
+  onChange: (
+    files: WrapperFile[] | ((prev: WrapperFile[]) => WrapperFile[]),
+  ) => void;
   onCancel: (files: WrapperFile | WrapperFile[]) => void;
 }
 

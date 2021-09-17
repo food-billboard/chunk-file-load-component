@@ -79,7 +79,7 @@ const isUploadValidFile = (files, another) => {
   });
 };
 
-describe.skip(`Upload Component test`, () => {
+describe(`Upload Component test`, () => {
   describe('defaultValue test', () => {
     it(`defaultValue set string`, async () => {
       const props = {
@@ -2601,7 +2601,7 @@ describe.skip(`Upload Component test`, () => {
           expect(files.length).toEqual(1);
           expect(files[0].getStatus() == 0).toBeTruthy();
 
-          uploadTask(wrapper, false);
+          uploadTask(wrapper, 0, false);
 
           await sleep(1000);
         });

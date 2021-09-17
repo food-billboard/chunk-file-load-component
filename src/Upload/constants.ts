@@ -1,5 +1,5 @@
 import { DropzoneOptions } from 'react-dropzone';
-import { noop } from 'lodash-es';
+import { noop } from 'lodash';
 
 export const DEFAULT_DROP_PROPS: Partial<DropzoneOptions> = {};
 
