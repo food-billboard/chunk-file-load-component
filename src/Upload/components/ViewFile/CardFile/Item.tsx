@@ -7,10 +7,15 @@ import React, {
 } from 'react';
 import Progress from '../Progress';
 import ActionModal from './Action';
-import { UploadContext, WrapperFile, UploadProps } from '@/Upload';
+import { UploadContext, WrapperFile, UploadProps } from '../../../index';
 import Icon from '../IconRender';
-import { CancelMethod, UploadMethod, StopMethod } from '../index';
-import { useProgress } from '@/Upload/utils';
+import {
+  CancelMethod,
+  UploadMethod,
+  StopMethod,
+  PreviewMethod,
+} from '../index';
+import { useProgress } from '../../../utils';
 import './index.less';
 
 const ViewItem = memo(
@@ -20,14 +25,11 @@ const ViewItem = memo(
       onCancel: CancelMethod;
       onUpload: UploadMethod;
       onStop: StopMethod;
+      onPreview: PreviewMethod;
       itemRender: any;
     } & Pick<
       UploadProps,
-      | 'showUploadList'
-      | 'iconRender'
-      | 'viewType'
-      | 'previewFile'
-      | 'onPreviewFile'
+      'showUploadList' | 'iconRender' | 'viewType' | 'previewFile'
     >,
   ) => {
     const [isDealing, setIsDealing] = useState<boolean>(false);
@@ -45,7 +47,7 @@ const ViewItem = memo(
       iconRender,
       showUploadList,
       itemRender,
-      onPreviewFile,
+      onPreview,
     } = props;
     const { task, local, id, name } = value;
     const progressInfo = useProgress(name);
@@ -73,17 +75,19 @@ const ViewItem = memo(
     const node = (
       <div className={'chunk-upload-card-item'}>
         <Icon iconRender={iconRender} file={value} viewType={viewType!} />
-        {!isComplete && (
-          <Progress
-            file={value}
-            onChange={onProgressChange}
-            className="chunk-upload-card-item-progress"
-            style={{ flexDirection: 'column', width: '100%' }}
-            showInfo={false}
-            strokeWidth={5}
-            progress={progressInfo}
-          />
-        )}
+        <Progress
+          file={value}
+          onChange={onProgressChange}
+          className="chunk-upload-card-item-progress"
+          style={{
+            flexDirection: 'column',
+            width: '100%',
+            visibility: isComplete ? 'hidden' : 'visible',
+          }}
+          showInfo={false}
+          strokeWidth={5}
+          progress={progressInfo}
+        />
         <div className="chunk-upload-card-item-info">
           <span>{local?.value?.filename || local?.value?.fileId || id}</span>
         </div>
@@ -97,7 +101,7 @@ const ViewItem = memo(
           previewFile={previewFile}
           showUploadList={showUploadList}
           viewType={viewType}
-          onPreviewFile={onPreviewFile}
+          onPreview={onPreview}
         />
       </div>
     );

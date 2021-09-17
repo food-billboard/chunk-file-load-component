@@ -1,4 +1,5 @@
-import React, { memo, useCallback, useContext, useMemo } from 'react';
+import React, { memo, useCallback, useContext, useMemo, useRef } from 'react';
+import { noop } from 'lodash';
 import Card from './CardFile';
 import List from './ListFile';
 import {
@@ -6,20 +7,23 @@ import {
   WrapperFile,
   UploadProps,
   UploadContext,
-} from '@/Upload';
-import { withTry } from '@/utils';
-import { isUploaded } from '@/Upload/utils';
+} from '../../index';
+import PreviewModal, { PreviewModalRef } from '../Preview';
+import { withTry } from '../../../utils';
+import { isUploaded } from '../../utils';
 
 export type CancelMethod = (task: WrapperFile) => Promise<boolean>;
 export type UploadMethod = (task: WrapperFile) => Promise<void>;
 export type StopMethod = (task: WrapperFile) => void;
+export type PreviewMethod = (task: WrapperFile) => void;
 export type ViewDetailProps = Omit<
   ViewFileProps,
-  'instance' | 'onRemove' | 'onChange'
+  'instance' | 'onRemove' | 'onChange' | 'onCancel' | 'onPreviewFile'
 > & {
   onCancel: CancelMethod;
   onUpload: UploadMethod;
   onStop: StopMethod;
+  onPreview: PreviewMethod;
 };
 
 export const actionIconPerformance = (
@@ -71,14 +75,52 @@ export const actionIconPerformance = (
 };
 
 export default memo((props: ViewFileProps) => {
-  const { viewType, onChange, onRemove, instance, value, ...nextProps } = props;
+  const {
+    viewType,
+    onChange,
+    onRemove,
+    instance,
+    value = [],
+    onCancel: releasePreviewCache,
+    previewFile,
+    onPreviewFile,
+    ...nextProps
+  } = props;
   const { setValue } = useContext(UploadContext);
+  const previewModalRef = useRef<PreviewModalRef>(null);
+
+  const onStop: StopMethod = useCallback(
+    (task) => {
+      if (!isUploaded(task)) {
+        const fileTask = task.task!;
+        if (!fileTask) return;
+        const result = instance.stop(fileTask.symbol);
+        if (!result.length) {
+          console.warn(
+            'the task is not stop, please check whether this task is reasonable',
+          );
+        }
+      }
+    },
+    [instance],
+  );
+
+  const stopActionWhenRequestCancel = useCallback(() => {
+    // TODO
+    return {
+      stop: noop,
+      done: noop,
+    };
+  }, []);
 
   const onCancel: CancelMethod = useCallback(
     async (task) => {
       if (onRemove) {
+        const { stop, done } = stopActionWhenRequestCancel();
+        stop();
         const [cancel, isCancel] = await withTry(onRemove)(task);
         if (!!cancel || isCancel === false) return false;
+        done();
       }
       const { local, error } = task;
       if (!isUploaded(task)) {
@@ -95,28 +137,15 @@ export default memo((props: ViewFileProps) => {
           );
         }
       }
-      const unCancelValue = value.filter(
-        (item) => item.local?.value?.fileId !== local?.value?.fileId,
-      );
-      onChange(unCancelValue);
+      const unCancelValue = (value: WrapperFile[]) =>
+        value.filter(
+          (item) => item.local?.value?.fileId !== local?.value?.fileId,
+        );
+      releasePreviewCache(task);
+      setTimeout(onChange.bind(null, unCancelValue), 10);
       return true;
     },
-    [instance, value, onChange, onRemove],
-  );
-
-  const onStop: StopMethod = useCallback(
-    (task) => {
-      if (!isUploaded(task)) {
-        const fileTask = task.task!;
-        const result = instance.stop(fileTask.symbol);
-        if (!result.length) {
-          console.warn(
-            'the task is not stop, please check whether this task is reasonable',
-          );
-        }
-      }
-    },
-    [instance],
+    [instance, onChange, onRemove, releasePreviewCache],
   );
 
   const onUpload: UploadMethod = useCallback(
@@ -130,19 +159,24 @@ export default memo((props: ViewFileProps) => {
         } else if (!error) {
           result = instance.deal(fileTask.symbol);
         } else if (task.task) {
-          setValue(
-            (prev: WrapperFile[]) => {
-              return prev.map((item) => {
-                if (item.id !== task.id) return item;
-                return {
-                  ...item,
-                  error: null,
-                };
-              });
-            },
-            () => {},
-          );
-          result = instance.uploading(task.task);
+          setValue((prev: WrapperFile[]) => {
+            return prev.map((item) => {
+              if (item.id !== task.id) return item;
+              result = instance.uploading(task.task!);
+              const [name] = result;
+              const newTask = name ? instance.getTask(name) : item.task;
+              return {
+                ...item,
+                get task() {
+                  return newTask || item.task;
+                },
+                getStatus() {
+                  return (newTask || item.task)?.status;
+                },
+                error: null,
+              };
+            });
+          });
         }
         if (!result.length) {
           console.warn(
@@ -154,6 +188,15 @@ export default memo((props: ViewFileProps) => {
     [instance, setValue],
   );
 
+  const onPreview: PreviewMethod = useCallback(
+    (value) => {
+      return previewModalRef.current?.open({
+        value,
+      });
+    },
+    [previewModalRef],
+  );
+
   const container = useMemo(() => {
     const props = {
       ...nextProps,
@@ -161,6 +204,7 @@ export default memo((props: ViewFileProps) => {
       onCancel,
       onStop,
       onUpload,
+      onPreview,
     };
     switch (viewType) {
       case 'card':
@@ -172,5 +216,15 @@ export default memo((props: ViewFileProps) => {
     }
   }, [viewType, nextProps, onCancel, onStop, onUpload, value]);
 
-  return container;
+  return (
+    <>
+      {container}
+      <PreviewModal
+        ref={previewModalRef}
+        previewFile={previewFile}
+        viewType={viewType!}
+        onPreviewFile={onPreviewFile}
+      />
+    </>
+  );
 });

@@ -1,25 +1,12 @@
 import React, { memo, CSSProperties } from 'react';
-import {
-  FileImageTwoTone,
-  FileMarkdownTwoTone,
-  FilePdfTwoTone,
-  FilePptTwoTone,
-  FileTextTwoTone,
-  FileUnknownTwoTone,
-  FileWordTwoTone,
-  FileZipTwoTone,
-  FolderOutlined,
-  VideoCameraTwoTone,
-  FileOutlined,
-  FileTwoTone,
-} from '@ant-design/icons';
 import classnames from 'classnames';
-import { get } from 'lodash-es';
-import { className, IMAGE_FALLBACK } from '@/utils';
-import { WrapperFile } from '@/Upload';
+import { get } from 'lodash';
+import FileImageTwoTone from '@ant-design/icons/FileImageTwoTone';
+import { className, IMAGE_FALLBACK } from '../../../../utils';
+import { WrapperFile } from '../../../index';
 import './index.less';
 
-export const DEFAULT_ICON = FileTwoTone;
+export const DEFAULT_ICON: any = null;
 
 const PREFIX = 'chunk-upload-icon-card';
 
@@ -47,18 +34,10 @@ const FileImageTwoToneNode = memo(
   },
 );
 
-const IconMap = {
+const IconCardMap = {
   image: FileImageTwoToneNode,
-  video: VideoCameraTwoTone,
-  markdown: FileMarkdownTwoTone,
-  pdf: FilePdfTwoTone,
-  ppt: FilePptTwoTone,
-  text: FileTextTwoTone,
-  unknown: FileUnknownTwoTone,
-  word: FileWordTwoTone,
-  zip: FileZipTwoTone,
 };
 
-export default IconMap;
+export default IconCardMap;
 
 // folder: FolderOutlined

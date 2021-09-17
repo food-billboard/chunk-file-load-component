@@ -1,5 +1,5 @@
 import { TWrapperTask } from 'chunk-file-upload';
-import { merge } from 'lodash-es';
+import { merge } from 'lodash';
 import { nanoid } from 'nanoid';
 import { UploadProps, WrapperFile, PartialWrapperFile } from '../type';
 import { DEFAULT_COMPLETE_FILE, DEFAULT_UN_COMPLETE_FILE } from '../constants';
@@ -23,10 +23,16 @@ export const mergeDefaultTask = (task: PartialWrapperFile): WrapperFile => {
       id: nanoid(),
     }) as WrapperFile;
   }
-  return merge({}, DEFAULT_UN_COMPLETE_FILE, task, {
+
+  return {
     getTask: () => task.task?.status,
+    ...DEFAULT_UN_COMPLETE_FILE,
     id: nanoid(),
-  }) as WrapperFile;
+    get task() {
+      return task.task || undefined;
+    },
+    ...task,
+  } as WrapperFile;
 };
 
 export const propsValueFormat = (value: UploadProps['defaultValue']) => {
@@ -55,6 +61,6 @@ export const isUploaded = (task: WrapperFile) => {
 
 export const createPreview = (file: File, task?: TWrapperTask) => {
   const type = file.type;
-  if (type.startsWith('image/')) return URL.createObjectURL(file);
+  if (type?.startsWith('image/')) return URL.createObjectURL(file);
   return '';
 };

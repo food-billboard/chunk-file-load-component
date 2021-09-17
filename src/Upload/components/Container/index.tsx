@@ -1,7 +1,7 @@
 import React, { memo, CSSProperties, useMemo } from 'react';
 import { DropzoneState } from 'react-dropzone';
-import { pick, merge } from 'lodash-es';
-import { UploadProps, ViewType } from '@/Upload';
+import { pick, merge } from 'lodash';
+import { UploadProps, ViewType } from '../../index';
 import ListFile from './ListFile';
 import CardFile from './CardFile';
 
@@ -26,17 +26,17 @@ const Container = memo(
     props: {
       viewType: ViewType;
       containerRender?: UploadProps['containerRender'];
-      maxFiles?: number;
       currentFiles: number;
+      limit?: UploadProps['limit'];
     } & ContainerProps,
   ) => {
-    const { viewType, containerRender, maxFiles, currentFiles, ...nextProps } =
+    const { viewType, containerRender, currentFiles, limit, ...nextProps } =
       props;
 
     const isLimit = useMemo(() => {
-      if (maxFiles === undefined) return false;
-      return maxFiles >= currentFiles;
-    }, [maxFiles]);
+      if (limit === undefined || !~limit) return false;
+      return limit >= currentFiles;
+    }, [limit]);
 
     if (containerRender) {
       let params: any = pick(nextProps, [

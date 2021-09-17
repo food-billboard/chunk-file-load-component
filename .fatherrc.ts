@@ -13,7 +13,7 @@ if (type === 'lib') {
         {
           libraryName: 'antd',
           libraryDirectory: 'lib',
-          style: false,
+          style: true,
         },
         'antd',
       ],
@@ -31,7 +31,10 @@ if (type === 'lib') {
 } else {
   config = {
     extractCSS: true,
-    esm: 'babel',
+    esm: {
+      type: 'babel',
+      importLibToEs: true,
+    },
     cjs: false,
     extraBabelPlugins: [
       [
