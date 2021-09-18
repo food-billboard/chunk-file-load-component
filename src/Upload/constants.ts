@@ -1,6 +1,5 @@
 import { DropzoneOptions } from 'react-dropzone';
-import { nanoid } from 'nanoid';
-import { noop } from 'lodash-es';
+import { noop } from 'lodash';
 
 export const DEFAULT_DROP_PROPS: Partial<DropzoneOptions> = {};
 
@@ -10,7 +9,7 @@ export const DEFAULT_UN_COMPLETE_FILE = {
 };
 
 export const DEFAULT_COMPLETE_FILE = {
-  getStatus: noop,
+  getStatus: () => 4,
 };
 
 export const LIFE_CYCLE_ENUM = [

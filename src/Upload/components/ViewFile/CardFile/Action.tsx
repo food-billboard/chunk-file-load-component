@@ -4,8 +4,8 @@ import React, {
   useState,
   useCallback,
   useMemo,
-  useRef,
 } from 'react';
+import { Button } from 'antd';
 import classnames from 'classnames';
 import {
   PauseCircleOutlined,
@@ -13,11 +13,8 @@ import {
   DeleteOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
-import { WrapperFile, UploadProps } from '@/Upload';
-import PreviewModal, { PreviewModalRef } from '../../Preview';
-import { CancelMethod, actionIconPerformance } from '../index';
-import { className } from '@/utils';
-import { Button } from 'antd';
+import { WrapperFile, UploadProps } from '../../../index';
+import { CancelMethod, actionIconPerformance, PreviewMethod } from '../index';
 
 const ActionModal = memo(
   (
@@ -27,13 +24,11 @@ const ActionModal = memo(
       onStop: () => void;
       onCancel: CancelMethod;
       onUpload: () => void;
+      onPreview: PreviewMethod;
       isDealing: boolean;
       isComplete: boolean;
       value: WrapperFile;
-    } & Pick<
-      UploadProps,
-      'previewFile' | 'showUploadList' | 'viewType' | 'onPreviewFile'
-    >,
+    } & Pick<UploadProps, 'previewFile' | 'showUploadList' | 'viewType'>,
   ) => {
     const {
       showUploadList,
@@ -47,13 +42,11 @@ const ActionModal = memo(
       value,
       previewFile,
       viewType = 'list',
-      onPreviewFile,
+      onPreview,
     } = props;
     const { error } = value;
 
     const [cancelLoading, setCancelLoading] = useState<boolean>(false);
-
-    const previewRef = useRef<PreviewModalRef>(null);
 
     const prefix = 'chunk-upload-action-modal';
 
@@ -63,14 +56,14 @@ const ActionModal = memo(
       !result && setCancelLoading(false);
     }, [value, onCancel]);
 
-    const onPreview = useCallback(() => {
-      previewRef.current?.open();
-    }, [previewRef]);
+    const handlePreview = useCallback(() => {
+      return onPreview?.(value);
+    }, [onPreview, value]);
 
     const uploadButtonAction = useCallback(
       (uploadIcon: any, stopIcon: any) => {
         if (isComplete) return null;
-        if (isDealing) {
+        if (isDealing && !error) {
           return (
             <Button
               onClick={onStop}
@@ -89,7 +82,7 @@ const ActionModal = memo(
           />
         );
       },
-      [isDealing, onUpload, onStop, isComplete, cancelLoading],
+      [isDealing, onUpload, onStop, isComplete, cancelLoading, error],
     );
 
     const actionRender = useMemo(() => {
@@ -116,7 +109,7 @@ const ActionModal = memo(
           )}
           {previewShow && (
             <Button
-              onClick={onPreview}
+              onClick={handlePreview}
               icon={previewIconNode || <EyeOutlined />}
               loading={cancelLoading}
               type="link"
@@ -131,7 +124,7 @@ const ActionModal = memo(
       cancelLoading,
       handleCancel,
       value,
-      onPreview,
+      handlePreview,
       uploadButtonAction,
       showUploadList,
       previewFile,
@@ -140,13 +133,6 @@ const ActionModal = memo(
     return (
       <div style={style} className={classnames(prefix, className)}>
         {actionRender}
-        <PreviewModal
-          ref={previewRef}
-          value={value}
-          previewFile={previewFile}
-          viewType={viewType}
-          onPreviewFile={onPreviewFile}
-        />
       </div>
     );
   },

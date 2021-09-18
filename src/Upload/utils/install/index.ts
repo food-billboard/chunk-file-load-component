@@ -17,3 +17,7 @@ const INSTALL_MAP: {
   request: undefined,
   validator: undefined,
 };
+
+export const uninstall = (key: keyof CustomAction) => {
+  INSTALL_MAP[key] = undefined;
+};

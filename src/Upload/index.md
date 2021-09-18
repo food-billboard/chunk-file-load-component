@@ -95,6 +95,87 @@ export default () => {
 };
 ```
 
+立即上传:
+
+```tsx
+import React from 'react';
+import { Upload } from 'chunk-file-load-component';
+
+//mock local server
+let mockCache = {};
+
+const sleep = (times = 500) =>
+  new Promise((resolve) => setTimeout(resolve, times));
+
+export default () => {
+  const exitDataFn = async (
+    params: {
+      filename: string;
+      md5: string;
+      suffix: string;
+      size: number;
+      chunkSize: number;
+      chunksLength: number;
+    },
+    name: Symbol,
+  ) => {
+    await sleep();
+    console.log('exitDataFn', params);
+    mockCache[name] = {
+      max: params.chunksLength,
+      chunkSize: params.chunkSize,
+      size: params.size,
+      index: 0,
+    };
+    //Mock server response
+    return {
+      data: 0,
+    };
+  };
+
+  const uploadFn = async (data: FormData, name: Symbol) => {
+    await sleep();
+    console.log('uploadFn', data, name);
+    const size = mockCache[name].size;
+    mockCache[name].index++;
+    const nextOffset = mockCache[name].index * mockCache[name].chunkSize;
+    //Mock server response
+    return {
+      data: nextOffset >= size ? size : nextOffset,
+    };
+  };
+
+  const completeFn = async (data: any) => {
+    await sleep();
+    console.log('completeFn', data);
+    mockCache[data.name] = {};
+  };
+
+  return (
+    <>
+      <Upload
+        immediately
+        onRemove={sleep.bind(null, 1000)}
+        viewType="list"
+        request={
+          {
+            // exitDataFn,
+            // uploadFn,
+            // completeFn,
+            // callback(err, value) {
+            //   console.log(err, value);
+            //   if (!err) {
+            //     console.log('Upload Done!!');
+            //   }
+            // },
+          }
+        }
+      />
+    </>
+  );
+};
+```
+
 错误:
 
 ```tsx
@@ -280,14 +361,26 @@ export default () => {
 2. 使用
 
 ```tsx | pure
+import React from 'react';
 import request from 'chunk-upload-request';
 import { Upload } from 'chunk-file-load-component';
 
-Upload.install('request', request);
+Upload.install('request', request());
 
 const App = () => {
-  return <Upload />;
+  return (
+    <Upload
+      immediately={false}
+      actionUrl={['/api/check', '/api/load', '/api/complete']}
+      lifecycle={{
+        afterComplete() {
+          console.log('upload complete');
+        },
+      }}
+    />
+  );
 };
+export default App;
 ```
 
 - 注册`request`插件后，组件则不需要传递`request`参数，如果传递，则使用`props`的`request`
@@ -1188,6 +1281,7 @@ export default () => {
 | onChange        | 文件列表变化时的回调                                                                                                                            | `(value: WrapperFile[]) => void`                                                                                                                                                                                                                                                                                                                  | -                                       |
 | onValidator     | 文件验证                                                                                                                                        | `(errorFile: File[], fulfilledFile: File[]) => void`                                                                                                                                                                                                                                                                                              | -                                       |
 | onRemove        | 点击移除文件时的回调，返回值为 false 时不移除。支持返回一个 Promise 对象，Promise 对象 resolve(false) 或 reject 时不移除                        | `(task: WrapperFile) => (boolean \| Promise)`                                                                                                                                                                                                                                                                                                     | -                                       |
+| onError         | 文件上传出错时(注意，取消或暂停时也会触发此方法)                                                                                                | `(error: any, task: WrapperFile) => void`                                                                                                                                                                                                                                                                                                         | -                                       |
 | viewStyle       | 自定义文件列表样式                                                                                                                              | `CSSProperties`                                                                                                                                                                                                                                                                                                                                   | -                                       |
 | viewClassName   | 自定义文件列表类名                                                                                                                              | `string`                                                                                                                                                                                                                                                                                                                                          | -                                       |
 | viewType        | 上传列表的内建样式，支持两种基本样式 `list`, `card`                                                                                             | `list` &#124; `card`                                                                                                                                                                                                                                                                                                                              | `list`                                  |
@@ -1198,7 +1292,8 @@ export default () => {
 | onPreviewFile   | 当文件预览时，返回`boolean`控制是否预览                                                                                                         | `(file: WrapperFile) => Promise<boolean>`                                                                                                                                                                                                                                                                                                         | -                                       |
 | containerRender | 自定义上传容器渲染                                                                                                                              | `(action: { isDragAccept: boolean, isDragActive: boolean, isDragReject: boolean, isFocused: boolean, isFileDialogActive: boolean, locale?: object, isLimit: boolean }) => ReactNode`                                                                                                                                                              | -                                       |
 | immediately     | 是否立即上传                                                                                                                                    | `boolean`                                                                                                                                                                                                                                                                                                                                         | `true`                                  |
-| actionUrl       | 上传地址                                                                                                                                        | `string`                                                                                                                                                                                                                                                                                                                                          | -                                       |
+| limit           | 限制上传的文件数量，只在新增时限制，设置`-1`则不限制                                                                                            | `number`                                                                                                                                                                                                                                                                                                                                          | `-1`                                    |
+| actionUrl       | 上传地址                                                                                                                                        | `string\|[string, string, string?]`                                                                                                                                                                                                                                                                                                               | -                                       |
 | method          | 请求方法，分为三阶段(上传前预查，上传，上传完成)                                                                                                | `[string \| false, string, string \| false]`                                                                                                                                                                                                                                                                                                      | `["get", "post", "post]`                |
 | headers         | 请求的额外请求头，分为三阶段(上传前预查，上传，上传完成)                                                                                        | `[object \| false, object \| false, object \| false]`                                                                                                                                                                                                                                                                                             | -                                       |
 | withCredentials | 上传请求时是否携带 `cookie`                                                                                                                     | `boolean`                                                                                                                                                                                                                                                                                                                                         | `false`                                 |

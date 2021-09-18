@@ -8,7 +8,7 @@ function itemRender(
   file: WrapperFile,
   files: WrapperFile[],
 ) {
-  const { itemRender, onCancel, onStop, onUpload } = props;
+  const { itemRender, onCancel, onStop, onUpload, onPreview } = props;
   if (!itemRender) return false;
   return function (
     node: ReactElement,
@@ -24,9 +24,7 @@ function itemRender(
       file,
       files,
       {
-        preview() {
-          return file.local?.value?.preview;
-        },
+        preview: onPreview.bind(null, file),
         cancel: onCancel.bind(null, file),
         stop: onStop.bind(null, file),
         upload: onUpload.bind(null, file),
