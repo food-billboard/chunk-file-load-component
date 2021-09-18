@@ -1,9 +1,13 @@
 {
   "private": false,
   "name": "chunk-file-load-component",
+  "version": "1.0.0",
   "description": "文件上传组件",
-  "version": "0.0.0",
   "scripts": {
+    "prepare": "husky install",
+    "postinstall": "husky install",
+    "prepublishOnly": "pinst --disable",
+    "postpublish": "pinst --enable",
     "start": "dumi dev",
     "docs:build": "dumi build",
     "docs:deploy": "gh-pages -d docs-dist",
@@ -14,19 +18,16 @@
     "test": "umi-test",
     "test:coverage": "umi-test --coverage"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/food-billboard/chunk-file-load"
-  },
-  "author": "glf",
   "keywords": [
     "chunk",
     "upload",
+    "react",
     "component",
-    "resumable"
+    "file"
   ],
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/food-billboard/chunk-file-load-component"
   },
   "files": [
     "es/",
@@ -41,9 +42,6 @@
   "module": "es/index.js",
   "typings": "lib/index.d.ts",
   "types": "lib/index.d.ts",
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
   "lint-staged": {
     "*.{js,jsx,less,md,json}": [
       "prettier --write"
@@ -62,6 +60,7 @@
     "@babel/runtime": "^7.15.4",
     "chunk-file-upload": "^1.0.8",
     "classnames": "^2.3.1",
+    "commitizen": "^4.2.4",
     "dropzone": "^5.9.2",
     "lodash": "^4.17.21",
     "nanoid": "^3.1.23",
@@ -80,8 +79,10 @@
     "enzyme-adapter-react-16": "^1.15.6",
     "father-build": "^1.17.2",
     "gh-pages": "^3.2.3",
+    "husky": "^7.0.2",
     "jest": "^27.1.0",
     "lint-staged": "^10.0.7",
+    "pinst": "^2.1.6",
     "prettier": "^2.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

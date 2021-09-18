@@ -9,7 +9,7 @@ node_modules/
 .DS_Store
 jest.config.js
 tsconfig.json
-jest-setup-test.js
 /.awcache
 /doc
 yarn-error.log
+jest-setup-test.js

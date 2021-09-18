@@ -79,7 +79,7 @@ const isUploadValidFile = (files, another) => {
   });
 };
 
-describe(`Upload Component test`, () => {
+describe.skip(`Upload Component test`, () => {
   describe('defaultValue test', () => {
     it(`defaultValue set string`, async () => {
       const props = {

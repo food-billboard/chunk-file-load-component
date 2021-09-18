@@ -38,7 +38,7 @@ const customRequest = (callback) => (params) => {
   };
 };
 
-describe(`request about`, () => {
+describe.skip(`request about`, () => {
   it(`set actionUrl success`, async () => {
     let doneNote = {
       completeFn: false,
