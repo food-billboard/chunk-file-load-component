@@ -1,17 +1,32 @@
 {
-  "private": true,
+  "private": false,
   "name": "chunk-file-load-component",
-  "version": "1.0.0",
+  "description": "文件上传组件",
+  "version": "0.0.0",
   "scripts": {
     "start": "dumi dev",
     "docs:build": "dumi build",
     "docs:deploy": "gh-pages -d docs-dist",
     "build": "cross-env BUILD_TYPE=lib father-build && cross-env BUILD_TYPE=es father-build",
-    "deploy": "npm run docs:build && npm run docs:deploy",
+    "deploy": "np",
     "release": "npm run build && npm publish",
     "prettier": "prettier --write \"**/*.{js,jsx,tsx,ts,less,md,json}\"",
     "test": "umi-test",
     "test:coverage": "umi-test --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/food-billboard/chunk-file-load"
+  },
+  "author": "glf",
+  "keywords": [
+    "chunk",
+    "upload",
+    "component",
+    "resumable"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
   },
   "files": [
     "es/",
@@ -72,5 +87,6 @@
     "react-dom": "^17.0.2",
     "ts-jest": "^27.0.5",
     "yorkie": "^2.0.0"
-  }
+  },
+  "sideEffects": false
 }
