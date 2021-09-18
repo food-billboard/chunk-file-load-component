@@ -38,7 +38,7 @@ const customRequest = (callback) => (params) => {
   };
 };
 
-describe.skip(`Upload static method test`, () => {
+describe(`Upload static method test`, () => {
   describe('install test', () => {
     it(`install request test`, async () => {
       let doneNote = {
