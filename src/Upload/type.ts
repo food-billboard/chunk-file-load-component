@@ -160,6 +160,7 @@ export interface UploadContextType {
   emitter: Emitter;
   locale: UploadProps['locale'];
   setValue: any;
+  getValue: () => WrapperFile[]
 }
 
 export type FileTaskProgress = Map<Symbol, Required<TWrapperTask['process']>>;

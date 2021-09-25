@@ -41,7 +41,8 @@ export type ProgressType = TWrapperTask['process'] & { step: ECACHE_STATUS };
 function useProgress(
   name: Symbol,
 ): [number, number, number, number, ProgressType] {
-  const { emitter, instance } = useContext(UploadContext);
+
+  const { emitter, instance, getValue } = useContext(UploadContext);
 
   const [progress, setProgress] = useState<ProgressType>({
     current: 0,
@@ -49,6 +50,8 @@ function useProgress(
     complete: 0,
     step: 0,
   });
+
+  let isFirstInject = true 
 
   const action = useCallback(
     (instance: Upload, name: Symbol, params: any, response: any) => {
@@ -64,6 +67,19 @@ function useProgress(
   useEffect(() => {
     emitter.on(name, action.bind(null, instance));
   }, [emitter, instance]);
+
+  useEffect(() => {
+    if(!isFirstInject || !instance) return 
+    isFirstInject = true 
+    const files = getValue()
+    const target = files.find(item => item.name === name)
+    if(!target) return 
+    const status = target.getStatus()
+    const progress = target.task?.process
+    setProgress((prev) => {
+      return merge({}, prev, progress, { step: status ?? -3 });
+    });
+  }, [getValue])
 
   let { complete, total, current } = progress;
   complete ||= 0;

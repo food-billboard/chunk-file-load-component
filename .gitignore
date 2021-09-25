@@ -24,6 +24,7 @@
 .umi-production
 .umi-test
 .env.local
+/coverage
 
 # ide
 /.vscode

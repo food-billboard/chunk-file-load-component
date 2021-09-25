@@ -278,7 +278,7 @@ const sleep = (times = 500) =>
   new Promise((resolve) => setTimeout(resolve, times));
 
 export default () => {
-  const [uploadValue, setUploadValue] = useState([]);
+  const [uploadValue, setUploadValue] = useState(["自定义文件"]);
 
   const exitDataFn = async (
     params: {

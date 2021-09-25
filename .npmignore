@@ -13,3 +13,4 @@ tsconfig.json
 /doc
 yarn-error.log
 jest-setup-test.js
+/coverage

@@ -113,6 +113,15 @@ export default memo((props: ViewFileProps) => {
     };
   }, []);
 
+  const unCancelValue = (target: WrapperFile, origin: WrapperFile[]) => {
+    const targetId = target?.local?.value?.fileId
+    const result = origin.filter((item) => {
+      const originId = typeof item === "string" ? item : item.local?.value?.fileId
+      return originId !== targetId
+    });
+    return result 
+  }
+
   const onCancel: CancelMethod = useCallback(
     async (task) => {
       if (onRemove) {
@@ -122,7 +131,7 @@ export default memo((props: ViewFileProps) => {
         if (!!cancel || isCancel === false) return false;
         done();
       }
-      const { local, error } = task;
+      const { error } = task;
       if (!isUploaded(task)) {
         const fileTask = task.task!;
         let result = [];
@@ -137,12 +146,8 @@ export default memo((props: ViewFileProps) => {
           );
         }
       }
-      const unCancelValue = (value: WrapperFile[]) =>
-        value.filter(
-          (item) => item.local?.value?.fileId !== local?.value?.fileId,
-        );
       releasePreviewCache(task);
-      setTimeout(onChange.bind(null, unCancelValue), 10);
+      setTimeout(onChange.bind(null, unCancelValue.bind(null, task)), 10);
       return true;
     },
     [instance, onChange, onRemove, releasePreviewCache],

@@ -83,16 +83,17 @@ describe(`error test`, () => {
         viewType: 'list',
         onRemove: async () => {
           await sleep(300);
-          index++;
+          index++
           if (index == 3) {
-            const value = ref.current.getFiles();
-            expect(value).toBeInstanceOf(Array);
-            expect(value.length).toEqual(1);
-            sleep(100).then((_) => {
+            sleep(1000)
+            .then((_) => {
               const value = ref.current.getFiles();
               expect(value.length).toEqual(0);
               resolve();
-            });
+            })
+            .catch(err => {
+              reject(err)
+            })
           }
           return true;
         },

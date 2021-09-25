@@ -60,6 +60,7 @@ export const UploadContext = createContext<UploadContextType>({
   emitter,
   locale: {},
   setValue: noop,
+  getValue: () => [] 
 });
 
 const { Provider } = UploadContext;
@@ -348,8 +349,9 @@ const Upload = memo(
         emitter,
         locale,
         setValue: setFiles,
+        getValue: () => formatValue
       };
-    }, [locale]);
+    }, [locale, formatValue]);
 
     return (
       <Provider value={contextValue}>
