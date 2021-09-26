@@ -25,6 +25,7 @@ export type WrapperFile = {
   name: Symbol;
   task?: TWrapperTask;
   getStatus: () => ECACHE_STATUS;
+  getProgress: () => (TWrapperTask["process"] | undefined)
   error?: any;
 };
 

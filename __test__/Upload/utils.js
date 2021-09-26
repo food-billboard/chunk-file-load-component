@@ -90,8 +90,12 @@ export const deleteTask = (dom, index = 0, isList = true) => {
   return button;
 };
 
-export const previewTask = (dom) => {
-  const target = dom.find('.chunk-upload-list-item button');
-  target.at(2).simulate('click');
-  return target;
+export const previewTask = (dom, index=0, isList=true) => {
+  const find = isList
+  ? '.chunk-upload-list-item'
+  : '.chunk-upload-action-modal';
+  const target = dom.find(find);
+  const button = target.at(index).find('button');
+  button.at(2).simulate('click');
+  return button;
 };

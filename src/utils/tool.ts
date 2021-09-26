@@ -9,10 +9,6 @@ export function withTry<T = any>(func: Function) {
   };
 }
 
-export async function sleep(time: number = 1000) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
-
 export const className = (prefix: string, ...args: string[]) => {
   return `${prefix}-${args.join('-')}`;
 };

@@ -65,6 +65,10 @@ export const UploadContext = createContext<UploadContextType>({
 
 const { Provider } = UploadContext;
 
+const releaseEmitter = (name: Symbol) => {
+  emitter.off(name)
+}
+
 const Upload = memo(
   forwardRef<UploadInstanceType, UploadProps>((props, ref) => {
     const [files, setFiles] = useControllableValue<WrapperFile[]>(
@@ -123,6 +127,8 @@ const Upload = memo(
         });
         dealError && propsOnError?.(error, errorFiles);
       }
+      // release emitter 
+      releaseEmitter(value)
       callback?.(error, value);
     };
 
@@ -209,6 +215,9 @@ const Upload = memo(
                 getStatus() {
                   return task!.status;
                 },
+                getProgress() {
+                  return task?.process
+                }
               };
               acc.wrapperFiles.push(wrapperTask);
               if (immediately) UploadInstance.deal(name);

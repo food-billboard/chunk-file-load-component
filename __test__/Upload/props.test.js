@@ -468,6 +468,65 @@ describe(`Upload Component test`, () => {
       });
     });
 
+    it(`onRemove and use card viewType test`, async () => {
+      await new Promise(async (resolve, reject) => {
+        const ref = React.createRef();
+
+        const props = {
+          viewType: 'card',
+          onRemove() {
+            return true;
+          },
+          request: {
+            exitDataFn,
+            uploadFn,
+            completeFn,
+          },
+          immediately: false,
+        };
+
+        let wrapper = mount(<Upload ref={ref} {...props} />);
+
+        await act(async () => {
+          await sleep(100);
+          wrapper.find('input').simulate('change', {
+            target: {
+              files: [
+                ChunkUpload.arraybuffer2file(
+                  new ArrayBuffer(FILE_SIZE),
+                  FILE_NAME,
+                  {
+                    type: FILE_TYPE,
+                  },
+                ),
+              ],
+            },
+          });
+
+          await sleep(100);
+
+          wrapper = wrapper.update();
+
+          uploadTask(wrapper, 0, false);
+
+          await sleep(100);
+
+          deleteTask(wrapper, 0, false);
+
+          wrapper.update();
+
+          await sleep(100);
+
+          const files = ref.current.getFiles();
+          expect(files.length).toEqual(0);
+
+          await sleep(1500);
+
+          resolve();
+        });
+      });
+    });
+
     it(`onRemove return true test`, async () => {
       await new Promise(async (resolve, reject) => {
         const ref = React.createRef();
@@ -514,6 +573,59 @@ describe(`Upload Component test`, () => {
           deleteTask(wrapper);
 
           wrapper.update();
+
+          await sleep(100);
+
+          const files = ref.current.getFiles();
+          expect(files.length).toEqual(0);
+
+          await sleep(1500);
+
+          resolve();
+        });
+      });
+    });
+
+    it(`onRemove delete unupload task test`, async () => {
+      await new Promise(async (resolve, reject) => {
+        const ref = React.createRef();
+
+        const props = {
+          viewType: 'list',
+          onRemove() {
+            return true;
+          },
+          request: {
+            exitDataFn,
+            uploadFn,
+            completeFn,
+          },
+          immediately: false,
+        };
+
+        let wrapper = mount(<Upload ref={ref} {...props} />);
+
+        await act(async () => {
+          await sleep(100);
+          wrapper.find('input').simulate('change', {
+            target: {
+              files: [
+                ChunkUpload.arraybuffer2file(
+                  new ArrayBuffer(FILE_SIZE),
+                  FILE_NAME,
+                  {
+                    type: FILE_TYPE,
+                  },
+                ),
+              ],
+            },
+          });
+
+          await sleep(1000);
+
+          wrapper.update();
+
+          deleteTask(wrapper);
 
           await sleep(100);
 
@@ -1294,6 +1406,55 @@ describe(`Upload Component test`, () => {
       });
     });
 
+    it(`previewFile return false that use the default preview and use card viewType`, async () => {
+      const props = {
+        viewType: 'card',
+        immediately: false,
+        onPreviewFile() {
+          return true;
+        },
+        previewFile: async (file, viewType) => {
+          await sleep(100);
+          expect(file).toBeDefined();
+          expect(viewType).toEqual('card');
+          return false;
+        },
+      };
+
+      const wrapper = mount(<Upload {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(1000);
+      });
+
+      await act(async () => {
+        wrapper.update();
+
+        //预览
+        previewTask(wrapper, 0, false);
+
+        await sleep(1000);
+
+        const modal = document.querySelector(`.ant-modal-wrap`);
+        const style = modal.getAttribute('style');
+        expect(!style || !style.includes('display')).toBeTruthy();
+      });
+    });
+
     it(`previewFile return ReactNode that use newElement`, async () => {
       const defineItemNodeClass = 'definePreviewFileClass';
 
@@ -1447,6 +1608,8 @@ describe(`Upload Component test`, () => {
         expect(previewDone).toBeTruthy();
       });
     });
+
+    
   });
 
   describe('containerRender test', () => {

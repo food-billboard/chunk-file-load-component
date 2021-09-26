@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Upload as ChunkUpload } from 'chunk-file-upload';
@@ -13,6 +13,8 @@ import {
   FILE_NAME,
   FILE_TYPE,
   deleteTask,
+  stopTask,
+  DEFAULT_REQUEST
 } from './utils';
 
 describe(`error test`, () => {
@@ -219,4 +221,388 @@ describe(`error test`, () => {
       });
     });
   });
+
+  it(`change the viewType when uploading`, async () => {
+
+    await new Promise(async (resolve, reject) => {
+
+      const ref = React.createRef();
+
+      const props = {
+        immediately: false,
+        request: {
+          uploadFn: (...args) => {
+            return uploadFn(...args);
+          },
+          exitDataFn: (...args) => {
+            return exitDataFn(...args);
+          },
+          callback: (error, value) => {
+            if(error) {
+              reject(error)
+            }else {
+              resolve()
+            }
+          },
+        }
+      }
+
+      class CustomUpload extends Component {
+
+        state = {
+          viewType: "list"
+        }
+
+        ref = React.createRef()
+
+        changeType = () => {
+          const { viewType } = this.state 
+          this.setState({
+            viewType: viewType === "list" ? "card" : "list"
+          })
+        }
+
+        render() {
+
+          const { viewType } = this.state 
+
+          return (
+            <Upload viewType={viewType} ref={this.ref} {...this.props} />
+          )
+
+        }
+
+      }
+
+      const wrapper = mount(<CustomUpload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(1000);
+
+        wrapper.update();
+
+        uploadTask(wrapper);
+
+        const prevFiles = ref.current.ref.current.getFiles();
+        expect(prevFiles.length).toEqual(1);
+
+        const [ prevFile ] = prevFiles
+        const prevStatus = prevFile.getStatus() 
+        const { current: prevCurrent } = prevFile.getProgress()
+
+        ref.current.changeType()
+
+        await sleep(10)
+
+        const files = ref.current.ref.current.getFiles();
+        expect(files.length).toEqual(1);
+
+        const [ file ] = files
+        const status = file.getStatus() 
+        const { current } = file.getProgress()
+
+        expect(status >= prevStatus).toBeTruthy()
+        expect(current >= prevCurrent).toBeTruthy()
+
+      });
+    });
+
+  })
+
+  it(`change the viewType when uploaded`, async () => {
+
+    await new Promise(async (resolve, reject) => {
+
+      const ref = React.createRef();
+
+      const props = {
+        immediately: false,
+        request: {
+          uploadFn: (...args) => {
+            return uploadFn(...args);
+          },
+          exitDataFn: (...args) => {
+            return exitDataFn(...args);
+          },
+          callback: async (error, value) => {
+            const prevFiles = ref.current.ref.current.getFiles();
+            expect(prevFiles.length).toEqual(1);
+    
+            const [ prevFile ] = prevFiles
+            const prevStatus = prevFile.getStatus() 
+            const { current: prevCurrent } = prevFile.getProgress()
+    
+            ref.current.changeType()
+
+            await sleep(10)
+    
+            const files = ref.current.ref.current.getFiles();
+            expect(files.length).toEqual(1);
+    
+            const [ file ] = files
+            const status = file.getStatus() 
+            const { current } = file.getProgress()
+    
+            expect(status == prevStatus).toBeTruthy()
+            expect(current == prevCurrent).toBeTruthy()
+            if(error) {
+              reject(error)
+            }else {
+              resolve()
+            }
+          },
+        }
+      }
+
+      class CustomUpload extends Component {
+
+        state = {
+          viewType: "list"
+        }
+
+        ref = React.createRef()
+
+        changeType = () => {
+          const { viewType } = this.state 
+          this.setState({
+            viewType: viewType === "list" ? "card" : "list"
+          })
+        }
+
+        render() {
+
+          const { viewType } = this.state 
+
+          return (
+            <Upload viewType={viewType} ref={this.ref} {...this.props} />
+          )
+
+        }
+
+      }
+
+      const wrapper = mount(<CustomUpload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(1000);
+
+        wrapper.update();
+
+        uploadTask(wrapper);
+
+        const prevFiles = ref.current.ref.current.getFiles();
+        expect(prevFiles.length).toEqual(1);
+
+      });
+    });
+
+  })
+
+  it(`continue the task when the task stop before`, async () => {
+
+    await new Promise(async (resolve, reject) => {
+      let stopDone = false;
+
+      const ref = React.createRef();
+
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        request: {
+          ...DEFAULT_REQUEST,
+          exitDataFn,
+          uploadFn,
+          callback: (error, value) => {
+            if(stopDone) {
+              if (error) {
+                reject(error);
+              } else {
+                resolve();
+              }
+            }else {
+              stopDone = true 
+              uploadTask(wrapper)
+            }
+          },
+        },
+      };
+
+      const wrapper = mount(<Upload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(1000);
+
+        wrapper.update();
+
+        const files = ref.current.getFiles();
+        expect(files.length).toEqual(1);
+        expect(files[0].getStatus() == 0).toBeTruthy();
+
+        uploadTask(wrapper);
+
+        await sleep(100)
+
+        stopTask(wrapper)
+
+        
+      });
+    });
+
+  })
+
+  it(`retry the task when the task error before`, async () => {
+
+    await new Promise(async (resolve, reject) => {
+      let errorDone = false;
+
+      const ref = React.createRef();
+
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        request: {
+          ...DEFAULT_REQUEST,
+          exitDataFn,
+          uploadFn: (...args) => {
+            if(!errorDone) {
+              throw new Error()
+            }
+            return uploadFn(...args)
+          },
+          callback: (error, value) => {
+            if(errorDone) {
+              if (error) {
+                reject(error);
+              } else {
+                resolve();
+              }
+            }else {
+              errorDone = true 
+              uploadTask(wrapper)
+            }
+          },
+        },
+      };
+
+      const wrapper = mount(<Upload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+
+        await sleep(1000);
+
+        wrapper.update();
+
+        const files = ref.current.getFiles();
+        expect(files.length).toEqual(1);
+        expect(files[0].getStatus() == 0).toBeTruthy();
+
+        uploadTask(wrapper);
+        
+      });
+    });
+
+  })
+
+  it(`use the ref to get the task`, async () => {
+
+    await new Promise(async (resolve, reject) => {
+
+      const ref = React.createRef();
+
+      const props = {
+        viewType: 'list',
+        immediately: false,
+        onChange: (value) => {
+          const target = value[0]
+          const task = ref.current.getTask(target.name)
+          expect(task).not.toEqual(null)
+          resolve()
+        },
+        request: {
+          ...DEFAULT_REQUEST,
+          exitDataFn,
+          uploadFn: (...args) => {
+            return uploadFn(...args)
+          },
+        },
+      };
+
+      const wrapper = mount(<Upload ref={ref} {...props} />);
+
+      await act(async () => {
+        wrapper.find('input').simulate('change', {
+          target: {
+            files: [
+              ChunkUpload.arraybuffer2file(
+                new ArrayBuffer(FILE_SIZE),
+                FILE_NAME,
+                {
+                  type: FILE_TYPE,
+                },
+              ),
+            ],
+          },
+        });
+        
+      });
+    });
+
+  })
+
+
 });
