@@ -42,7 +42,7 @@ if (type === 'lib') {
         {
           libraryName: 'antd',
           libraryDirectory: 'es',
-          style: false,
+          style: true,
         },
         'antd',
       ],
