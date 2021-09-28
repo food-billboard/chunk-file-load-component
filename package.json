@@ -1,11 +1,11 @@
 {
   "private": false,
   "name": "chunk-file-load-component",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "文件上传组件",
   "scripts": {
     "prepare": "husky install",
-    "postinstall": "husky install",
+    "_postinstall": "husky install",
     "prepublishOnly": "pinst --disable",
     "postpublish": "pinst --enable",
     "start": "dumi dev",
