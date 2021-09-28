@@ -7,6 +7,7 @@ if (type === 'lib') {
     extractCSS: true,
     esm: false,
     cjs: 'babel',
+    lessInBabelMode: true,
     extraBabelPlugins: [
       [
         'babel-plugin-import',
@@ -35,6 +36,7 @@ if (type === 'lib') {
       type: 'babel',
       importLibToEs: true,
     },
+    lessInBabelMode: true,
     cjs: false,
     extraBabelPlugins: [
       [
