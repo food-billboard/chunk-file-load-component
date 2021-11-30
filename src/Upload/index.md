@@ -1,6 +1,8 @@
-## Upload
+# Upload
 
-基础:
+## 示例
+
+### 基础:
 
 ```tsx
 import React, { useState } from 'react';
@@ -95,7 +97,109 @@ export default () => {
 };
 ```
 
-立即上传:
+### 模拟服务端存储文件状态:
+
+```tsx
+import React from 'react';
+import { Upload } from 'chunk-file-load-component';
+
+//mock local server
+let mockCache = {};
+
+const sleep = (times = 500) =>
+  new Promise((resolve) => setTimeout(resolve, times));
+
+const findLastChunkIndex = (name) => {
+  if(!mockCache[name]) return 0 
+  const index = mockCache[name].index 
+  const size = mockCache[name].size 
+  const chunkSize = mockCache[name].chunkSize
+  const targetIndex = index.indexOf(0)
+  if(!~targetIndex) return size 
+  return targetIndex * chunkSize
+}
+
+export default () => {
+  const exitDataFn = async (
+    params: {
+      filename: string;
+      md5: string;
+      suffix: string;
+      size: number;
+      chunkSize: number;
+      chunksLength: number;
+    },
+    name: Symbol,
+  ) => {
+    console.log('exitDataFn', params);
+    await sleep();
+    if(!!mockCache[params.md5] && !~mockCache[params.md5].index.indexOf(0)) {
+      return {
+        data: params.size 
+      }
+    }else if(!!mockCache[params.md5]) {
+      const index = findLastChunkIndex(params.md5)
+      return {
+        data: index 
+      }
+    }
+    mockCache[params.md5] = {
+      max: params.chunksLength,
+      chunkSize: params.chunkSize,
+      size: params.size,
+      index: new Array(params.chunksLength).fill(0),
+    };
+    //Mock server response
+    return {
+      data: 0,
+    };
+  };
+
+  const uploadFn = async (data: FormData, name: Symbol) => {
+    console.log('uploadFn', data, name);
+    const index = data.get("index")
+    const md5 = data.get("md5")
+    const size = mockCache[md5].size;
+    mockCache[md5].index[index] = 1;
+    const nextOffset = findLastChunkIndex(md5)
+    await sleep();
+    //Mock server response
+    return {
+      data: nextOffset >= size ? size : nextOffset,
+    };
+  };
+
+  const completeFn = async (data: any) => {
+    await sleep();
+    console.log('completeFn', data);
+  };
+
+  return (
+    <>
+      <Upload
+        immediately
+        onRemove={sleep.bind(null, 1000)}
+        viewType="list"
+        request={
+          {
+            exitDataFn,
+            uploadFn,
+            completeFn,
+            callback(err, value) {
+              console.log(err, value);
+              if (!err) {
+                console.log('Upload Done!!');
+              }
+            },
+          }
+        }
+      />
+    </>
+  );
+};
+```
+
+### 立即上传:
 
 ```tsx
 import React from 'react';
@@ -159,15 +263,15 @@ export default () => {
         viewType="list"
         request={
           {
-            // exitDataFn,
-            // uploadFn,
-            // completeFn,
-            // callback(err, value) {
-            //   console.log(err, value);
-            //   if (!err) {
-            //     console.log('Upload Done!!');
-            //   }
-            // },
+            exitDataFn,
+            uploadFn,
+            completeFn,
+            callback(err, value) {
+              console.log(err, value);
+              if (!err) {
+                console.log('Upload Done!!');
+              }
+            },
           }
         }
       />
@@ -176,7 +280,7 @@ export default () => {
 };
 ```
 
-错误:
+### 错误:
 
 ```tsx
 import React from 'react';
@@ -265,7 +369,7 @@ export default () => {
 };
 ```
 
-上传受控:
+### 上传受控:
 
 ```tsx
 import React, { useState } from 'react';
@@ -353,7 +457,7 @@ export default () => {
 };
 ```
 
-预定义请求:
+### 预定义请求:
 
 - 可以使用[默认请求](https://github.com/food-billboard/chunk-upload-request)
 
@@ -386,7 +490,7 @@ export default App;
 - 注册`request`插件后，组件则不需要传递`request`参数，如果传递，则使用`props`的`request`
 - 也可以自己实现自定义的`request`插件，参数及实现与[chunk-file-load](https://github.com/food-billboard/chunk-file-load)的`request`一致
 
-生命周期:
+### 生命周期:
 
 ```tsx | pure
 const App = () => {
@@ -402,7 +506,7 @@ const App = () => {
 };
 ```
 
-自定义上传容器:
+### 自定义上传容器:
 
 ```tsx
 import React from 'react';
@@ -494,7 +598,7 @@ export default () => {
 };
 ```
 
-自定义上传列表
+### 自定义上传列表
 
 ```tsx
 import React from 'react';
@@ -590,7 +694,7 @@ export default () => {
 };
 ```
 
-自定义预览
+### 自定义预览
 
 ```tsx
 import React, { useState } from 'react';
@@ -693,7 +797,7 @@ export default () => {
 };
 ```
 
-自定义上传验证:
+### 自定义上传验证:
 
 ```tsx
 import React from 'react';
@@ -790,7 +894,7 @@ export default () => {
 };
 ```
 
-自定义文件图标:
+### 自定义文件图标:
 
 ```tsx
 import React from 'react';
@@ -879,7 +983,7 @@ export default () => {
 };
 ```
 
-自定义 uploadListIcon
+### 自定义 uploadListIcon
 
 ```tsx
 import React, { useState } from 'react';
@@ -991,7 +1095,7 @@ export default () => {
 };
 ```
 
-文件大小限制
+### 文件大小限制
 
 ```tsx
 import React from 'react';
@@ -1081,7 +1185,7 @@ export default () => {
 };
 ```
 
-自定义文案
+### 自定义文案
 
 ```tsx
 import React, { useState } from 'react';
@@ -1189,7 +1293,7 @@ export default () => {
 };
 ```
 
-多选
+### 多选
 
 ```tsx
 import React from 'react';
@@ -1270,7 +1374,7 @@ export default () => {
 };
 ```
 
-### API
+## API
 
 - tips 部分参数与[antd](https://github.com/ant-design/ant-design)中的`Upload`组件类似
 
